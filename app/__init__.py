@@ -37,11 +37,27 @@ def create_app(test_config=None):
     )
 
     # Standard configuration
+    is_serverless = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+    db_path = os.path.join(base_dir, "hackrec.db")
+    upload_path = os.path.join(base_dir, "uploads")
+
+    if is_serverless:
+        # Vercel serverless environment has a read-only root directory; copy db to /tmp for read-write access
+        import shutil
+        tmp_db = "/tmp/hackrec.db"
+        if os.path.exists(db_path) and not os.path.exists(tmp_db):
+            try:
+                shutil.copy2(db_path, tmp_db)
+            except Exception as e:
+                print(f"[Vercel Init] Could not copy seed DB to /tmp: {e}")
+        db_path = tmp_db
+        upload_path = "/tmp/uploads"
+
     app.config.from_mapping(
         SECRET_KEY=os.environ.get("SECRET_KEY", "hackrec-ait-super-secret-key-2026"),
-        SQLALCHEMY_DATABASE_URI=f"sqlite:///{os.path.join(base_dir, 'hackrec.db')}",
+        SQLALCHEMY_DATABASE_URI=os.environ.get("DATABASE_URL", f"sqlite:///{db_path}"),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
-        UPLOAD_FOLDER=os.path.join(base_dir, "uploads"),
+        UPLOAD_FOLDER=upload_path,
         MAX_CONTENT_LENGTH=site_config.MAX_UPLOAD_SIZE_MB * 1024 * 1024,
     )
 
@@ -49,7 +65,10 @@ def create_app(test_config=None):
         app.config.update(test_config)
 
     # Ensure uploads folder exists
-    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    try:
+        os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    except OSError:
+        pass
 
     # Initialize extensions with app
     db.init_app(app)

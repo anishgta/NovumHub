@@ -75,6 +75,45 @@
 
         <!-- Action Items (Strictly Unified 34px Height & Boxy Baseline Alignment) -->
         <div class="nav-actions">
+          <!-- Looped Background Music Controller (Lofi Synth) -->
+          <div class="nav-music-player" id="nav-music-player">
+            <button type="button" class="music-toggle-btn" id="music-toggle-btn" aria-label="Toggle Lo-fi Background Music" title="Background Music: Lofi Synth by ZephiraMusic (Click to play/pause)">
+              <span class="music-bars" aria-hidden="true">
+                <span class="bar bar-1"></span>
+                <span class="bar bar-2"></span>
+                <span class="bar bar-3"></span>
+              </span>
+              <span class="music-label">Lofi</span>
+              <span class="music-caret" aria-hidden="true">&darr;</span>
+            </button>
+            <div class="music-popover" id="music-popover">
+              <div class="music-popover-header">
+                <div class="music-track-title">Lofi Synth</div>
+                <div class="music-artist-name">ZephiraMusic &bull; Pixabay</div>
+              </div>
+              <div class="music-controls-row">
+                <button type="button" class="music-mute-btn" id="music-mute-btn" aria-label="Mute or unmute music" title="Mute/Unmute">
+                  <svg id="music-vol-icon-active" class="music-vol-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                  </svg>
+                  <svg id="music-vol-icon-muted" class="music-vol-icon" style="display:none;" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <line x1="23" y1="9" x2="17" y2="15"></line>
+                    <line x1="17" y1="9" x2="23" y2="15"></line>
+                  </svg>
+                </button>
+                <input type="range" class="music-volume-slider" id="music-volume-slider" min="0" max="100" value="35" aria-label="Music volume">
+                <span class="music-vol-val" id="music-vol-val">35%</span>
+              </div>
+              <div class="music-popover-footer">
+                <span class="music-loop-tag">[LOOPED]</span>
+                <span class="music-status-text" id="music-status-text">Paused &bull; Click to Play</span>
+              </div>
+            </div>
+          </div>
+
           {% if current_user.is_authenticated %}
             <!-- Judge / Admin quick evaluation workspace link -->
             {% if current_user.is_judge or current_user.is_admin %}

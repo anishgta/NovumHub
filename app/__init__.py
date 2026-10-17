@@ -36,33 +36,51 @@ def create_app(test_config=None):
         static_folder=os.path.join(base_dir, "static")
     )
 
-    # Standard configuration
-    is_serverless = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
-    db_path = os.path.join(base_dir, "hackrec.db")
-    upload_path = os.path.join(base_dir, "uploads")
+    # Environment-based storage and database configuration
+    is_vercel = bool(os.environ.get("VERCEL"))
+    secret_key = os.environ.get("SECRET_KEY", "novumhub-dev-secret-key-2026-safe-fallback")
 
-    if is_serverless:
-        # Vercel serverless environment has a read-only root directory; copy db to /tmp for read-write access
-        import shutil
-        tmp_db = "/tmp/hackrec.db"
-        if not os.path.exists(tmp_db):
+    if is_vercel:
+        # Vercel serverless functions have a read-only filesystem except /tmp
+        db_path = "/tmp/novumhub.db"
+        upload_path = "/tmp/uploads"
+
+        # Safely create directories in /tmp at startup
+        try:
+            os.makedirs(os.path.dirname(db_path), exist_ok=True)
+            os.makedirs(upload_path, exist_ok=True)
+        except OSError:
+            pass
+
+        # If seed database exists in the project and /tmp/novumhub.db does not exist yet, copy it over
+        if not os.path.exists(db_path):
             candidate_sources = [
-                db_path,
+                os.path.join(base_dir, "novumhub.db"),
+                os.path.join(base_dir, "hackrec.db"),
                 os.path.join(os.getcwd(), "hackrec.db"),
                 os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "hackrec.db")
             ]
             for src in candidate_sources:
                 if os.path.exists(src):
                     try:
-                        shutil.copy2(src, tmp_db)
+                        import shutil
+                        shutil.copy2(src, db_path)
                         break
                     except Exception as e:
-                        print(f"[Vercel Init] Could not copy DB from {src} to /tmp: {e}")
-        db_path = tmp_db
-        upload_path = "/tmp/uploads"
+                        print(f"[Vercel Init] Could not copy DB from {src} to {db_path}: {e}")
+    else:
+        # Local development paths
+        db_path = os.path.join(base_dir, "hackrec.db")
+        upload_path = os.path.join(base_dir, "uploads")
+
+        # Safely create local uploads directory at startup
+        try:
+            os.makedirs(upload_path, exist_ok=True)
+        except OSError:
+            pass
 
     app.config.from_mapping(
-        SECRET_KEY=os.environ.get("SECRET_KEY", "hackrec-ait-super-secret-key-2026"),
+        SECRET_KEY=secret_key,
         SQLALCHEMY_DATABASE_URI=os.environ.get("DATABASE_URL", f"sqlite:///{db_path}"),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         UPLOAD_FOLDER=upload_path,
@@ -72,7 +90,7 @@ def create_app(test_config=None):
     if test_config:
         app.config.update(test_config)
 
-    # Ensure uploads folder exists
+    # Ensure uploads folder exists if overridden in test_config
     try:
         os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     except OSError:

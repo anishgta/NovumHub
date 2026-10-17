@@ -780,4 +780,158 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
+
+
+  // ============================================================================
+  // 7. PERSISTENT LOOPED BACKGROUND MUSIC CONTROLLER (LOFI SYNTH)
+  // ============================================================================
+  const bgAudio = document.getElementById("site-bg-music");
+  const musicToggleBtn = document.getElementById("music-toggle-btn");
+  const musicMuteBtn = document.getElementById("music-mute-btn");
+  const musicVolSlider = document.getElementById("music-volume-slider");
+  const musicVolVal = document.getElementById("music-vol-val");
+  const musicStatusText = document.getElementById("music-status-text");
+  const volIconActive = document.getElementById("music-vol-icon-active");
+  const volIconMuted = document.getElementById("music-vol-icon-muted");
+
+  if (bgAudio && musicToggleBtn) {
+    const STORAGE_KEY_PLAYING = "novum_bg_music_playing";
+    const STORAGE_KEY_TIME = "novum_bg_music_time";
+    const STORAGE_KEY_VOL = "novum_bg_music_volume";
+    const STORAGE_KEY_MUTED = "novum_bg_music_muted";
+
+    // Restore saved volume (default to 0.35 for pleasant background ambiance)
+    const savedVol = parseFloat(localStorage.getItem(STORAGE_KEY_VOL) || "0.35");
+    bgAudio.volume = isNaN(savedVol) ? 0.35 : Math.max(0, Math.min(1, savedVol));
+    if (musicVolSlider) musicVolSlider.value = Math.round(bgAudio.volume * 100);
+    if (musicVolVal) musicVolVal.textContent = Math.round(bgAudio.volume * 100) + "%";
+
+    // Restore saved muted state
+    const savedMuted = localStorage.getItem(STORAGE_KEY_MUTED) === "true";
+    bgAudio.muted = savedMuted;
+    updateMuteUI(savedMuted);
+
+    // Restore playback timestamp across page transitions
+    const savedTime = parseFloat(sessionStorage.getItem(STORAGE_KEY_TIME) || "0");
+    if (!isNaN(savedTime) && savedTime > 0) {
+      bgAudio.currentTime = savedTime;
+    }
+
+    function updatePlayUI(isPlaying) {
+      if (isPlaying) {
+        musicToggleBtn.classList.add("is-playing");
+        musicToggleBtn.setAttribute("aria-pressed", "true");
+        if (musicStatusText) musicStatusText.innerHTML = "Playing &bull; Click to Pause";
+      } else {
+        musicToggleBtn.classList.remove("is-playing");
+        musicToggleBtn.setAttribute("aria-pressed", "false");
+        if (musicStatusText) musicStatusText.innerHTML = "Paused &bull; Click to Play";
+      }
+    }
+
+    function updateMuteUI(isMuted) {
+      if (volIconActive && volIconMuted) {
+        if (isMuted) {
+          volIconActive.style.display = "none";
+          volIconMuted.style.display = "inline";
+        } else {
+          volIconActive.style.display = "inline";
+          volIconMuted.style.display = "none";
+        }
+      }
+    }
+
+    function playAudio() {
+      const playPromise = bgAudio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            updatePlayUI(true);
+            localStorage.setItem(STORAGE_KEY_PLAYING, "true");
+          })
+          .catch((err) => {
+            console.log("[Music] Autoplay policy prevented immediate playback:", err);
+            updatePlayUI(false);
+          });
+      }
+    }
+
+    function pauseAudio() {
+      bgAudio.pause();
+      updatePlayUI(false);
+      localStorage.setItem(STORAGE_KEY_PLAYING, "false");
+    }
+
+    // Toggle button click
+    musicToggleBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (bgAudio.paused) {
+        playAudio();
+      } else {
+        pauseAudio();
+      }
+    });
+
+    // Volume Slider
+    if (musicVolSlider) {
+      musicVolSlider.addEventListener("input", function () {
+        const vol = parseInt(this.value, 10) / 100;
+        bgAudio.volume = vol;
+        if (musicVolVal) musicVolVal.textContent = this.value + "%";
+        localStorage.setItem(STORAGE_KEY_VOL, vol.toString());
+        if (bgAudio.muted && vol > 0) {
+          bgAudio.muted = false;
+          updateMuteUI(false);
+          localStorage.setItem(STORAGE_KEY_MUTED, "false");
+        }
+      });
+    }
+
+    // Mute button
+    if (musicMuteBtn) {
+      musicMuteBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        bgAudio.muted = !bgAudio.muted;
+        updateMuteUI(bgAudio.muted);
+        localStorage.setItem(STORAGE_KEY_MUTED, bgAudio.muted.toString());
+      });
+    }
+
+    // Continuously save current playback time so page navigations resume seamlessly
+    bgAudio.addEventListener("timeupdate", function () {
+      if (!bgAudio.paused && bgAudio.currentTime > 0) {
+        sessionStorage.setItem(STORAGE_KEY_TIME, bgAudio.currentTime.toString());
+      }
+    });
+
+    window.addEventListener("beforeunload", function () {
+      if (bgAudio.currentTime > 0) {
+        sessionStorage.setItem(STORAGE_KEY_TIME, bgAudio.currentTime.toString());
+      }
+    });
+
+    // Handle seamless session persistence across navigations
+    const wasPlaying = localStorage.getItem(STORAGE_KEY_PLAYING) === "true";
+    if (wasPlaying) {
+      const promise = bgAudio.play();
+      if (promise !== undefined) {
+        promise
+          .then(() => {
+            updatePlayUI(true);
+          })
+          .catch(() => {
+            const unlockAudio = function () {
+              if (localStorage.getItem(STORAGE_KEY_PLAYING) === "true" && bgAudio.paused) {
+                bgAudio.play().then(() => updatePlayUI(true)).catch(() => {});
+              }
+              document.removeEventListener("pointerdown", unlockAudio);
+              document.removeEventListener("keydown", unlockAudio);
+            };
+            document.addEventListener("pointerdown", unlockAudio, { once: true });
+            document.addEventListener("keydown", unlockAudio, { once: true });
+          });
+      }
+    }
+  }
 });
+

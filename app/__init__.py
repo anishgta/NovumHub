@@ -45,11 +45,19 @@ def create_app(test_config=None):
         # Vercel serverless environment has a read-only root directory; copy db to /tmp for read-write access
         import shutil
         tmp_db = "/tmp/hackrec.db"
-        if os.path.exists(db_path) and not os.path.exists(tmp_db):
-            try:
-                shutil.copy2(db_path, tmp_db)
-            except Exception as e:
-                print(f"[Vercel Init] Could not copy seed DB to /tmp: {e}")
+        if not os.path.exists(tmp_db):
+            candidate_sources = [
+                db_path,
+                os.path.join(os.getcwd(), "hackrec.db"),
+                os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "hackrec.db")
+            ]
+            for src in candidate_sources:
+                if os.path.exists(src):
+                    try:
+                        shutil.copy2(src, tmp_db)
+                        break
+                    except Exception as e:
+                        print(f"[Vercel Init] Could not copy DB from {src} to /tmp: {e}")
         db_path = tmp_db
         upload_path = "/tmp/uploads"
 
@@ -125,7 +133,7 @@ def create_app(test_config=None):
 
     # Register Blueprints
     from app.auth import auth_bp
-    from app.main import main_bp
+    from app.routes import main_bp
     from app.submissions import submissions_bp
     from app.review import review_bp
     from app.showcase import showcase_bp
@@ -188,7 +196,14 @@ def create_app(test_config=None):
 
     # Automatically create database tables and apply non-destructive column updates
     with app.app_context():
-        from app.migrate_db import upgrade_schema
-        upgrade_schema(app)
+        try:
+            from app.migrate_db import upgrade_schema
+            upgrade_schema(app)
+        except Exception as e:
+            app.logger.warning(f"Database schema migration warning: {e}")
 
     return app
+
+
+# Default top-level instance for WSGI / serverless environments (e.g. Vercel)
+app = create_app()

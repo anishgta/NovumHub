@@ -168,7 +168,7 @@ Every icon on the website is a standalone SVG file referenced via:
 Want to create an `FAQ` or `Sponsors` page? Follow these 3 easy steps:
 
 ### Step 1: Create a Route in Python
-Open `app/main.py` and add this code at the bottom:
+Open `app/routes.py` and add this code at the bottom:
 ```python
 @main_bp.route("/faq")
 def faq():

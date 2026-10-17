@@ -1,2 +1,8 @@
+[project]
+name = "novumhub"
+version = "1.0.0"
+description = "NovumHub Platform - Army Institute of Technology"
+requires-python = ">=3.11"
+
 [tool.vercel]
-entrypoint = "run:app"
+entrypoint = "index:app"

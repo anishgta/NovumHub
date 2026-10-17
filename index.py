@@ -1,1 +1,10 @@
-from run import app
+"""
+index.py
+================================================================================
+Vercel / WSGI index entrypoint fallback.
+================================================================================
+"""
+
+from app import create_app
+
+app = create_app()

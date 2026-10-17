@@ -1,0 +1,86 @@
+<!--
+  templates/partials/submission_card.html
+  ==============================================================================
+  BOXY PAPER SUBMISSION CARD
+  Reusable card layout to display a single submission with boxy paper styling.
+  Expects: submission
+  ==============================================================================
+-->
+<article class="paper-card submission-card" style="box-shadow: 3px 3px 0px var(--paper-ink);">
+  <!-- Card Header: Badges & Upvote -->
+  <div class="submission-card-header">
+    <div class="badges-row">
+      <!-- Category Badge -->
+      <span class="paper-stamp badge-{{ submission.category }}">
+        <img src="{{ url_for('static', filename='icons/icon-' + submission.category + '.svg') }}" class="site-icon" alt="">
+        {{ config_data.CATEGORIES.get(submission.category, {}).get('name') }}
+      </span>
+
+      <!-- Status Badge -->
+      {% set status_val = submission.status %}
+      {% include 'partials/status_badge.html' %}
+
+      {% if submission.attachment_path %}
+        <span class="paper-stamp" title="Has attachment">
+          <img src="{{ url_for('static', filename='icons/icon-attachment.svg') }}" class="site-icon" alt=""> File
+        </span>
+      {% endif %}
+    </div>
+
+    <!-- Upvote Toggle Button -->
+    <div>
+      <button 
+        type="button" 
+        class="paper-upvote-btn upvote-btn ajax-upvote-btn {% if current_user.is_authenticated and submission.has_upvoted(current_user) %}upvoted{% endif %}"
+        data-id="{{ submission.id }}"
+        title="Upvote this contribution"
+      >
+        <span class="upvote-arrow">&uarr;</span>
+        <span class="upvote-count">{{ submission.upvote_count }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Title Linking to Detail View -->
+  <h3 class="submission-title">
+    <a href="{{ url_for('submissions.detail', submission_id=submission.id) }}">
+      {{ submission.title }}
+    </a>
+  </h3>
+
+  <!-- Meta Details (Author, Dept, Date) -->
+  <div class="meta-row">
+    <span>
+      <img src="{{ url_for('static', filename='icons/icon-user.svg') }}" class="site-icon" alt="">
+      {% if submission.anonymous_public and not (current_user.is_authenticated and (current_user.id == submission.author_id or current_user.is_reviewer)) %}
+        <em>Anonymous Student</em>
+      {% else %}
+        {{ submission.author.name }}
+        {% if submission.anonymous_public %}
+          <small style="color: var(--paper-ink-muted);">(submitted anonymously to public)</small>
+        {% endif %}
+      {% endif %}
+    </span>
+    {% if submission.author.department %}
+      <span>&bull; <img src="{{ url_for('static', filename='icons/icon-department.svg') }}" class="site-icon" alt=""> {{ submission.author.department }}</span>
+    {% endif %}
+    <span>&bull; <img src="{{ url_for('static', filename='icons/icon-calendar.svg') }}" class="site-icon" alt=""> {{ submission.created_at.strftime('%d %b %Y') }}</span>
+    <span>&bull; <img src="{{ url_for('static', filename='icons/icon-comment.svg') }}" class="site-icon" alt=""> {{ submission.comments|length }} comments</span>
+  </div>
+
+  <!-- Summary Text -->
+  <p style="margin-bottom: 0.85rem; color: var(--paper-ink-body); line-height: 1.55;">
+    {{ submission.summary }}
+  </p>
+
+  <!-- Tags Row -->
+  {% if submission.tags %}
+    <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+      {% for tag in submission.tags.split(',') %}
+        {% if tag.strip() %}
+          <span class="paper-stamp" style="font-size: 0.7rem; padding: 0.15rem 0.4rem; background: var(--paper-sheet-warm);">#{{ tag.strip() }}</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+</article>

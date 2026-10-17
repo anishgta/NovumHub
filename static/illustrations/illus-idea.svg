@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 380" fill="none">
+  <defs>
+    <!-- Soft Organic Pastel Blob Gradient -->
+    <linearGradient id="blobIdea" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E0E7FF" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#EDE9FE" stop-opacity="0.6"/>
+    </linearGradient>
+    <linearGradient id="lineGradBluePink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4D7CFF"/>
+      <stop offset="100%" stop-color="#F472B6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Organic amorphous background shape (matches reference backdrop) -->
+  <path d="M70,120 C40,40 180,20 270,30 C360,40 430,90 420,180 C410,270 360,330 260,340 C160,350 80,310 60,240 C40,180 90,170 70,120 Z" 
+        fill="url(#blobIdea)"/>
+
+  <!-- Subtle ambient particles -->
+  <circle cx="95" cy="85" r="4" fill="#4D7CFF" opacity="0.3"/>
+  <circle cx="390" cy="70" r="3" fill="#F472B6" opacity="0.4"/>
+  <circle cx="410" cy="280" r="5" fill="#8B5CF6" opacity="0.25"/>
+  <circle cx="80" cy="280" r="3" fill="#4D7CFF" opacity="0.3"/>
+
+  <!-- Holographic Floating Screen / TV display in front of maker -->
+  <g transform="translate(320, 110)">
+    <!-- Stand / Screen frame -->
+    <rect x="0" y="0" width="80" height="95" rx="6" stroke="#4D7CFF" stroke-width="2.5" fill="#ffffff" fill-opacity="0.75"/>
+    <line x1="40" y1="95" x2="40" y2="135" stroke="#4D7CFF" stroke-width="2.5"/>
+    <ellipse cx="40" cy="135" rx="20" ry="4" stroke="#4D7CFF" stroke-width="2" fill="#E0E7FF"/>
+    <!-- Screen content: App wireframe & robotics logic -->
+    <rect x="8" y="10" width="64" height="20" rx="3" fill="#EEF2FF" stroke="#8B5CF6" stroke-width="1.5"/>
+    <line x1="14" y1="20" x2="38" y2="20" stroke="#4D7CFF" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="62" cy="20" r="3" fill="#F472B6"/>
+    
+    <rect x="8" y="36" width="30" height="48" rx="3" stroke="#F472B6" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <rect x="42" y="36" width="30" height="22" rx="3" fill="#FDF2F8" stroke="#F472B6" stroke-width="1.5"/>
+    <rect x="42" y="62" width="30" height="22" rx="3" fill="#F5F3FF" stroke="#8B5CF6" stroke-width="1.5"/>
+    
+    <!-- Projection light beam from screen to creator -->
+    <path d="M-5 15 L -90 40 L -90 90 L -5 85 Z" fill="#80A8FF" fill-opacity="0.08"/>
+  </g>
+
+  <!-- Beanbag Lounge Chair -->
+  <path d="M120 220 C 100 180, 140 140, 175 160 C 205 175, 200 240, 260 250 C 310 260, 310 300, 270 315 C 220 330, 150 325, 120 290 C 100 270, 95 240, 120 220 Z" 
+        stroke="#4D7CFF" stroke-width="2.5" stroke-linejoin="round" fill="#ffffff" fill-opacity="0.85"/>
+  <path d="M130 250 C 150 270, 200 280, 245 270" stroke="#8B5CF6" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+  <!-- Student Figure Lounging (Minimalist line-art with blue & pink strokes) -->
+  <g>
+    <!-- Head & Hair -->
+    <ellipse cx="195" cy="120" rx="14" ry="16" stroke="#090B2A" stroke-width="2.5" fill="#ffffff"/>
+    <!-- Hair stylish swoop -->
+    <path d="M185 115 C 185 105, 195 98, 208 102 C 215 105, 215 115, 210 118" stroke="#F472B6" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    
+    <!-- Torso leaning back in beanbag -->
+    <path d="M190 136 C 180 155, 175 190, 185 220 C 195 235, 230 240, 245 235" 
+          stroke="#090B2A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- Shirt / Collar accent -->
+    <path d="M188 136 L 198 150 L 208 136" stroke="#4D7CFF" stroke-width="2"/>
+
+    <!-- Left Arm holding tablet / remote pointing to screen -->
+    <path d="M192 160 C 210 168, 245 170, 270 165" stroke="#090B2A" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="274" cy="164" r="3.5" fill="#F472B6"/>
+    <!-- Remote / Pen pointing light -->
+    <line x1="274" y1="164" x2="310" y2="155" stroke="#F472B6" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 3"/>
+
+    <!-- Right Arm relaxed on lap -->
+    <path d="M182 170 C 175 195, 190 215, 220 210" stroke="#090B2A" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Legs stretched out comfortably -->
+    <!-- Left Leg -->
+    <path d="M235 235 C 265 240, 290 235, 320 238 C 330 240, 335 250, 330 258 C 315 265, 280 260, 245 255" 
+          stroke="#4D7CFF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <!-- Slipper / Foot -->
+    <path d="M330 242 L 350 242 C 355 245, 350 255, 335 255 Z" stroke="#090B2A" stroke-width="2" fill="#EDE9FE"/>
+
+    <!-- Right Leg crossed underneath -->
+    <path d="M225 240 C 245 260, 275 270, 305 270 C 315 272, 315 280, 300 282 C 270 282, 235 270, 215 250" 
+          stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M305 272 L 320 274 C 325 278, 315 284, 305 284 Z" stroke="#090B2A" stroke-width="1.8" fill="#FDF2F8"/>
+  </g>
+
+  <!-- Floating ideation icons (lightbulb, code brackets, gear) -->
+  <g transform="translate(130, 80)">
+    <circle cx="0" cy="0" r="14" fill="#ffffff" stroke="#F472B6" stroke-width="1.8"/>
+    <!-- Lightbulb wire -->
+    <path d="M-4 -3 C-4 -7, 4 -7, 4 -3 C4 -1, 1 1, 1 4 L-1 4 C-1 1, -4 -1, -4 -3 Z" stroke="#F472B6" stroke-width="1.5" fill="none"/>
+    <line x1="-2" y1="6" x2="2" y2="6" stroke="#F472B6" stroke-width="1.5"/>
+  </g>
+
+  <g transform="translate(250, 50)">
+    <circle cx="0" cy="0" r="13" fill="#ffffff" stroke="#4D7CFF" stroke-width="1.8"/>
+    <path d="M-4 -3 L -8 0 L -4 3 M4 -3 L 8 0 L 4 3" stroke="#4D7CFF" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+</svg>

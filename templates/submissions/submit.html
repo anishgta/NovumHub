@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit a Contribution - {{ config_data.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1040px; margin: 1rem auto;">
+  
+  <div class="paper-card" style="margin-bottom: 2rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+      <span class="paper-stamp stamp-accent">[NEW PROPOSAL // DISPATCH GATE]</span>
+      <span class="paper-stamp">[AUTONOMOUS LEDGER]</span>
+    </div>
+    <h1 style="margin: 0.2rem 0; font-size: 2.1rem; font-weight: 800;">Submit Campus Contribution</h1>
+    <p style="color: var(--paper-ink-muted); margin: 0; font-size: 0.95rem;">
+      Propose an engineering build, share research findings, correct academic literature, or suggest campus infrastructure fixes.
+    </p>
+  </div>
+
+  <div class="activity-two-col-grid" style="grid-template-columns: 1.4fr 0.6fr; align-items: start;">
+    
+    <!-- ====================================================================
+         MAIN SUBMISSION FORM
+         ==================================================================== -->
+    <article class="paper-card" style="padding: 2rem;">
+      <form method="POST" action="{{ url_for('submissions.submit') }}" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+
+        <!-- 1. Category Selector -->
+        <div style="margin-bottom: 1.5rem;">
+          <label for="category-selector">
+            <strong>1. Select Contribution Category</strong>
+          </label>
+          {{ form.category(id="category-selector", required=True) }}
+          {% for error in form.category.errors %}
+            <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700;">{{ error }}</small>
+          {% endfor %}
+        </div>
+
+        <!-- 2. Common Fields -->
+        <div style="margin-bottom: 1.25rem;">
+          <label for="title">
+            <strong>2. Title</strong>
+          </label>
+          {{ form.title(placeholder="e.g. Automated Attendance using ESP32 & RFID in Mech Lab", id="title", required=True) }}
+          {% for error in form.title.errors %}
+            <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700; display: block;">{{ error }}</small>
+          {% endfor %}
+        </div>
+
+        <div style="margin-bottom: 1.25rem;">
+          <label for="summary">
+            <strong>3. Short Summary (1-2 sentences)</strong>
+          </label>
+          {{ form.summary(placeholder="Brief summary displayed on feeds and cards...", id="summary", required=True) }}
+          {% for error in form.summary.errors %}
+            <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700; display: block;">{{ error }}</small>
+          {% endfor %}
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label for="details">
+            <strong>4. Full Detailed Description</strong>
+          </label>
+          {{ form.details(rows=5, placeholder="Provide complete background, steps, or explanation...", id="details", required=True) }}
+          {% for error in form.details.errors %}
+            <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700; display: block;">{{ error }}</small>
+          {% endfor %}
+        </div>
+
+        <!-- ================================================================
+             DYNAMIC CATEGORY-SPECIFIC FIELDS
+             ================================================================ -->
+
+        <!-- Category A: Innovative Idea -->
+        <div id="group-idea" style="display: none; padding: 1.25rem; background: #fffbeb; border: 2px solid var(--paper-ink); box-shadow: 2px 2px 0px var(--paper-ink); margin: 1.5rem 0;">
+          <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem;">
+            <span class="paper-stamp badge-idea">[CATEGORY // IDEA SPEC]</span>
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label for="idea_impact">Expected Community / Campus Impact</label>
+            {{ form.idea_impact(rows=2, placeholder="Who will benefit and how?") }}
+          </div>
+
+          <div>
+            <label for="idea_resources">Estimated Resources / Guidance Needed</label>
+            {{ form.idea_resources(placeholder="e.g., 3 Raspberry Pis, permission for Lab 4 after 5 PM") }}
+          </div>
+        </div>
+
+        <!-- Category B: Research Finding -->
+        <div id="group-research" style="display: none; padding: 1.25rem; background: #eff6ff; border: 2px solid var(--paper-ink); box-shadow: 2px 2px 0px var(--paper-ink); margin: 1.5rem 0;">
+          <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem;">
+            <span class="paper-stamp badge-research">[CATEGORY // RESEARCH DATA]</span>
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label for="research_methodology">Methodology / Experimental Setup</label>
+            {{ form.research_methodology(rows=2, placeholder="Explain tools, dataset, testing environment...") }}
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label for="research_results">Key Findings / Quantitative Results</label>
+            {{ form.research_results(rows=2, placeholder="Summary of results, accuracy, latency...") }}
+          </div>
+
+          <div>
+            <label for="research_link">Link to Paper / Code Repository / DOI (Optional)</label>
+            {{ form.research_link(placeholder="https://github.com/... or DOI URL") }}
+          </div>
+        </div>
+
+        <!-- Category C: Research Correction -->
+        <div id="group-correction" style="display: none; padding: 1.25rem; background: #fff1f2; border: 2px solid var(--paper-ink); box-shadow: 2px 2px 0px var(--paper-ink); margin: 1.5rem 0;">
+          <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem;">
+            <span class="paper-stamp badge-correction">[CATEGORY // ACADEMIC CORRECTION]</span>
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label for="correction_item">Item Being Corrected</label>
+            {{ form.correction_item(placeholder="e.g. TE Comp Lab Manual Ex. 4, page 12 or Notice #241") }}
+            {% for error in form.correction_item.errors %}
+              <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700; display: block;">{{ error }}</small>
+            {% endfor %}
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label for="correction_wrong">What is Wrong or Outdated?</label>
+            {{ form.correction_wrong(rows=2, placeholder="Specify the exact incorrect formula, code, or statement.") }}
+            {% for error in form.correction_wrong.errors %}
+              <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700; display: block;">{{ error }}</small>
+            {% endfor %}
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label for="correction_correct">What is the Correct Information?</label>
+            {{ form.correction_correct(rows=2, placeholder="Provide the verified replacement statement or calculation.") }}
+            {% for error in form.correction_correct.errors %}
+              <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700; display: block;">{{ error }}</small>
+            {% endfor %}
+          </div>
+
+          <div>
+            <label for="correction_evidence">Evidence / Academic Source Reference</label>
+            {{ form.correction_evidence(rows=2, placeholder="Cite standard textbook, IEEE paper, official doc link...") }}
+            {% for error in form.correction_evidence.errors %}
+              <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700; display: block;">{{ error }}</small>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Category D: Infrastructure Suggestion -->
+        <div id="group-infrastructure" style="display: none; padding: 1.25rem; background: #ecfdf5; border: 2px solid var(--paper-ink); box-shadow: 2px 2px 0px var(--paper-ink); margin: 1.5rem 0;">
+          <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem;">
+            <span class="paper-stamp badge-infrastructure">[CATEGORY // INFRASTRUCTURE]</span>
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label for="infra_location">Campus Location / Facility</label>
+            {{ form.infra_location(placeholder="e.g., D-Hostel 2nd Floor wing, Central Library Reading Hall") }}
+            {% for error in form.infra_location.errors %}
+              <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700; display: block;">{{ error }}</small>
+            {% endfor %}
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label for="infra_problem">Current Problem Observed</label>
+            {{ form.infra_problem(rows=2, placeholder="Describe the deficiency or safety concern...") }}
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label for="infra_solution">Proposed Actionable Solution</label>
+            {{ form.infra_solution(rows=2, placeholder="What specific action should administration take?") }}
+          </div>
+
+          <div>
+            <label for="infra_priority">Priority Level</label>
+            {{ form.infra_priority() }}
+          </div>
+        </div>
+
+        <!-- Common: Tags & File Attachment -->
+        <div style="margin-bottom: 1.25rem;">
+          <label for="tags">Tags (comma separated)</label>
+          {{ form.tags(placeholder="e.g. wifi, hostel, network, hardware") }}
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label for="attachment">Supporting Attachment (Optional - PDF, PNG, JPG up to {{ config_data.MAX_UPLOAD_SIZE_MB }}MB)</label>
+          {{ form.attachment() }}
+          {% for error in form.attachment.errors %}
+            <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700; display: block;">{{ error }}</small>
+          {% endfor %}
+        </div>
+
+        <!-- Anonymous Checkbox -->
+        <label for="anonymous_public" style="display: flex; align-items: center; gap: 0.5rem; margin: 1.2rem 0; cursor: pointer;">
+          {{ form.anonymous_public(id="anonymous_public") }}
+          <span style="font-weight: 600;">{{ form.anonymous_public.label.text }}</span>
+        </label>
+
+        <!-- Submit Button -->
+        {{ form.submit(class="btn-paper btn-paper-accent", style="width: 100%; margin-top: 0.5rem;") }}
+      </form>
+    </article>
+
+    <!-- ====================================================================
+         SIDEBAR: SUBMISSION GUIDELINES
+         ==================================================================== -->
+    <aside style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <article class="paper-card" style="padding: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem;">
+          <span class="paper-stamp">[PROTOCOL RULES]</span>
+        </div>
+        <h4 style="margin-bottom: 0.75rem; font-weight: 800;">Quick Guidelines</h4>
+        <ul style="font-size: 0.88rem; padding-left: 1.2rem; color: var(--paper-ink-body); margin: 0; line-height: 1.6;">
+          <li style="margin-bottom: 0.5rem;"><strong>Be Concrete:</strong> Clearly state the engineering scope and realistic steps to implement it.</li>
+          <li style="margin-bottom: 0.5rem;"><strong>Cite Proof:</strong> For research corrections, always reference the textbook, IEEE paper, or notice.</li>
+          <li style="margin-bottom: 0.5rem;"><strong>Constructive Tone:</strong> Maintain respect toward faculty, peers, and campus staff.</li>
+          <li><strong>Track Progress:</strong> Once submitted, monitor reviewer rubric scores on your Dashboard.</li>
+        </ul>
+      </article>
+
+      <article class="paper-card" style="padding: 1.25rem; background: var(--paper-sheet-warm); border-left: 4px solid var(--brand-maroon);">
+        <h5 style="color: var(--brand-maroon); margin-bottom: 0.4rem; font-weight: 800;">Privacy Note</h5>
+        <p style="font-size: 0.85rem; margin: 0; color: var(--paper-ink-body); line-height: 1.5;">
+          If you check "Submit anonymously to public", fellow students will only see "Anonymous Student". Reviewers and administrators still verify your profile to prevent spam.
+        </p>
+      </article>
+    </aside>
+
+  </div>
+</div>
+{% endblock %}

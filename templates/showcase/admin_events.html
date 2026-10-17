@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Hackathon Events - {{ config_data.SHOWCASE_NAME }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto 3rem auto;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <div class="hero-pill-badge" style="margin-bottom: 0.5rem;">
+        <span class="pulsing-dot"></span>
+        <span>Administrator Console</span>
+      </div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--midnight-navy); margin: 0;">
+        Hackathon Events Management
+      </h1>
+    </div>
+
+    {% if not form %}
+      <a href="{{ url_for('showcase.admin_event_create') }}" class="btn-gradient-pill">
+        + Create New Hackathon Event
+      </a>
+    {% else %}
+      <a href="{{ url_for('showcase.admin_events') }}" class="btn-editorial-outline">
+        &larr; Back to Events List
+      </a>
+    {% endif %}
+  </div>
+
+  {% if form %}
+    <!-- Event Form (Create or Edit) -->
+    <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; box-shadow: var(--shadow-sm);">
+      <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 1.25rem;">
+        {% if edit_event %}Edit Event: {{ edit_event.name }}{% else %}Create Hackathon Event{% endif %}
+      </h3>
+
+      <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            {{ form.name.label }}
+            {{ form.name(placeholder="e.g. HackAIT 2026") }}
+            {% for error in form.name.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}
+          </div>
+          <div>
+            {{ form.year.label }}
+            {{ form.year(placeholder="2026") }}
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            {{ form.theme.label }}
+            {{ form.theme(placeholder="e.g. Code the Future, Empower Defense") }}
+          </div>
+          <div>
+            {{ form.organiser.label }}
+            {{ form.organiser(placeholder="e.g. Open Source Club (OSS), Dept of IT") }}
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          {{ form.tracks.label }}
+          {{ form.tracks(placeholder="AI & Automation, Web3 & Security, Campus Tech, Hardware & IoT") }}
+          <small style="color: #64748B;">Comma-separated list of competition tracks.</small>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          {{ form.description.label }}
+          {{ form.description(rows=4, placeholder="Overview, rules, and timeline details...") }}
+        </div>
+
+        <div style="display: flex; gap: 2rem; margin-bottom: 1.75rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; cursor: pointer;">
+            {{ form.is_active() }} Active for Student Submissions
+          </label>
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; cursor: pointer;">
+            {{ form.results_published() }} Publish Leaderboard & Results to Public
+          </label>
+        </div>
+
+        <button type="submit" class="btn-editorial-primary" style="font-size: 1rem; padding: 0.75rem 2rem;">
+          Save Hackathon Event
+        </button>
+      </form>
+    </div>
+
+  {% else %}
+    <!-- Events List Table -->
+    <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-sm);">
+      {% if events %}
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 2px solid #E2E8F0; text-align: left; font-size: 0.85rem; color: #64748B;">
+              <th style="padding: 0.6rem;">Event Name</th>
+              <th style="padding: 0.6rem;">Year</th>
+              <th style="padding: 0.6rem;">Tracks</th>
+              <th style="padding: 0.6rem; text-align: center;">Projects</th>
+              <th style="padding: 0.6rem; text-align: center;">Active</th>
+              <th style="padding: 0.6rem; text-align: center;">Results</th>
+              <th style="padding: 0.6rem; text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ev in events %}
+              <tr style="border-bottom: 1px solid #E2E8F0; font-size: 0.9rem;">
+                <td style="padding: 0.85rem 0.6rem;">
+                  <strong><a href="{{ url_for('showcase.event_detail', event_id=ev.id) }}">{{ ev.name }}</a></strong>
+                  {% if ev.theme %}
+                    <div style="font-size: 0.78rem; color: #64748B;">"{{ ev.theme }}"</div>
+                  {% endif %}
+                </td>
+                <td style="padding: 0.85rem 0.6rem; font-family: var(--font-mono);">{{ ev.year }}</td>
+                <td style="padding: 0.85rem 0.6rem; color: #475569; font-size: 0.82rem;">
+                  {{ ev.tracks_list|join(', ') }}
+                </td>
+                <td style="padding: 0.85rem 0.6rem; text-align: center; font-weight: 700;">
+                  {{ ev.projects|length }}
+                </td>
+                <td style="padding: 0.85rem 0.6rem; text-align: center;">
+                  {% if ev.is_active %}
+                    <span style="color: #059669; font-weight: 700;">&#10003; Open</span>
+                  {% else %}
+                    <span style="color: #94A3B8;">Closed</span>
+                  {% endif %}
+                </td>
+                <td style="padding: 0.85rem 0.6rem; text-align: center;">
+                  {% if ev.results_published %}
+                    <span style="color: var(--violet); font-weight: 700;">&#127942; Published</span>
+                  {% else %}
+                    <span style="color: #94A3B8;">Draft</span>
+                  {% endif %}
+                </td>
+                <td style="padding: 0.85rem 0.6rem; text-align: right;">
+                  <a href="{{ url_for('showcase.admin_event_edit', event_id=ev.id) }}" class="btn-editorial-outline" style="padding: 0.35rem 0.8rem; font-size: 0.82rem;">
+                    Edit
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty-showcase-card">
+          <h4>No hackathon events registered</h4>
+          <p style="color: var(--muted-text);">Create your first event to allow student teams to submit projects.</p>
+          <a href="{{ url_for('showcase.admin_event_create') }}" class="btn-gradient-pill">
+            + Create Hackathon Event
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

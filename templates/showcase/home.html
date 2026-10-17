@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ config_data.SHOWCASE_NAME }} - Hackathon Project Demonstrations{% endblock %}
+
+{% block content %}
+<!-- Showcase Hero Header -->
+<div class="showcase-hero-banner">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
+    <div>
+      <div class="hero-pill-badge" style="margin-bottom: 0.8rem;">
+        <span class="pulsing-dot"></span>
+        <span>AIT Hackathon Project Arena</span>
+      </div>
+      <h1>{{ config_data.SHOWCASE_NAME }}</h1>
+      <p>
+        Explore interactive WebGL builds, presentation decks, video demos, and developer notes
+        from Army Institute of Technology student hackathons. Evaluated by judges, preserved for future innovators.
+      </p>
+    </div>
+    <div style="display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap;">
+      <a href="{{ url_for('showcase.create_project') }}" class="btn-gradient-pill">
+        + Submit Project Demo
+      </a>
+      <a href="{{ url_for('showcase.library') }}" class="btn-glass-pill">
+        Reference Library
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Event & Mode Filters -->
+<div class="showcase-filter-bar">
+  <div class="filter-chips-row">
+    <span style="font-weight: 700; font-size: 0.85rem; color: var(--midnight-navy); margin-right: 0.5rem;">Events:</span>
+    <a href="{{ url_for('showcase.home') }}" class="filter-chip {% if not current_event_id %}active{% endif %}">
+      All Events
+    </a>
+    {% for ev in events %}
+      <a href="{{ url_for('showcase.home', event=ev.id, track=current_track, demo_mode=current_demo, sort=sort_by) }}" 
+         class="filter-chip {% if current_event_id == ev.id %}active{% endif %}">
+        {{ ev.name }} ({{ ev.year }})
+      </a>
+    {% endfor %}
+  </div>
+
+  <form method="GET" action="{{ url_for('showcase.home') }}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto; gap: 0.75rem; align-items: center; margin-bottom: 0;">
+    {% if current_event_id %}
+      <input type="hidden" name="event" value="{{ current_event_id }}">
+    {% endif %}
+
+    <div>
+      <select name="demo_mode" onchange="this.form.submit()" style="margin-bottom: 0;">
+        <option value="">All Demo Types</option>
+        {% for mode_key, mode_label in config_data.SHOWCASE_DEMO_MODES.items() %}
+          <option value="{{ mode_key }}" {% if current_demo == mode_key %}selected{% endif %}>{{ mode_label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <input type="text" name="tag" placeholder="Filter by tech tag (e.g. Unity, AI)" value="{{ current_tag or '' }}" style="margin-bottom: 0;">
+    </div>
+
+    <div>
+      <select name="sort" onchange="this.form.submit()" style="margin-bottom: 0;">
+        <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+        <option value="upvotes" {% if sort_by == 'upvotes' %}selected{% endif %}>Most Upvoted</option>
+      </select>
+    </div>
+
+    <div>
+      <button type="submit" class="btn-accent" style="width: auto; padding: 0.6rem 1.2rem; margin-bottom: 0;">
+        Filter
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Featured Projects Row (if any) -->
+{% if featured_projects and not current_tag and not current_demo and page == 1 %}
+  <div style="margin-bottom: 2.5rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+      <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--midnight-navy); margin: 0;">Featured Demonstrations</h3>
+      <span class="project-thumb-featured" style="position: static;">Curated</span>
+    </div>
+
+    <div class="showcase-grid">
+      {% for fp in featured_projects %}
+        <div class="project-card" style="border: 1.5px solid #F59E0B;">
+          <div class="project-thumbnail">
+            {% set cover = fp.get_asset('screenshot') %}
+            {% if cover %}
+              <img src="{{ url_for('showcase.download_asset', asset_id=cover.id) }}" alt="{{ fp.title }}">
+            {% else %}
+              <div style="color: #A5B4FC; font-weight: 700; text-align: center; padding: 1rem;">
+                <span style="font-size: 2rem; display: block; margin-bottom: 0.3rem;">&#9889;</span>
+                {{ fp.demo_mode_label }}
+              </div>
+            {% endif %}
+            <span class="project-thumb-badge">{{ fp.demo_mode_label }}</span>
+            <span class="project-thumb-featured">Featured</span>
+          </div>
+          <div class="project-card-body">
+            <h4 class="project-card-title">
+              <a href="{{ url_for('showcase.detail', project_id=fp.id) }}">{{ fp.title }}</a>
+            </h4>
+            <p class="project-pitch">{{ fp.pitch }}</p>
+            <div class="project-tags-row">
+              {% for tag in fp.tech_tags_list %}
+                <span class="project-tag">{{ tag }}</span>
+              {% endfor %}
+            </div>
+            <div class="project-card-footer">
+              <span><strong>Team:</strong> {{ fp.team_name }}</span>
+              <span style="font-family: var(--font-mono); font-weight: 700; color: var(--violet);">&#9650; {{ fp.upvote_count }}</span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+<!-- Main Projects Grid -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+  <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--midnight-navy); margin: 0;">
+    All Projects ({{ total_projects }})
+  </h3>
+  {% if current_event_id %}
+    <a href="{{ url_for('showcase.event_detail', event_id=current_event_id) }}" style="font-size: 0.9rem; font-weight: 600;">
+      View Event Leaderboard &rarr;
+    </a>
+  {% endif %}
+</div>
+
+{% if projects %}
+  <div class="showcase-grid">
+    {% for p in projects %}
+      <div class="project-card">
+        <div class="project-thumbnail">
+          {% set cover = p.get_asset('screenshot') %}
+          {% if cover %}
+            <img src="{{ url_for('showcase.download_asset', asset_id=cover.id) }}" alt="{{ p.title }}">
+          {% else %}
+            <div style="color: #A5B4FC; font-weight: 700; text-align: center; padding: 1rem;">
+              <span style="font-size: 2.2rem; display: block; margin-bottom: 0.3rem;">
+                {% if p.demo_mode == 'hosted_webgl' %}&#127918;
+                {% elif p.demo_mode == 'video' %}&#9654;
+                {% elif p.demo_mode == 'external_embed' %}&#127760;
+                {% elif p.demo_mode == 'download' %}&#128229;
+                {% else %}&#128247;{% endif %}
+              </span>
+              {{ p.demo_mode_label }}
+            </div>
+          {% endif %}
+          <span class="project-thumb-badge">{{ p.demo_mode_label }}</span>
+          {% if p.is_featured %}
+            <span class="project-thumb-featured">&#9733; Featured</span>
+          {% endif %}
+        </div>
+        <div class="project-card-body">
+          <div style="font-size: 0.78rem; font-weight: 700; color: var(--electric-blue); text-transform: uppercase; margin-bottom: 0.3rem;">
+            {{ p.event.name }} &bull; {{ p.track }}
+          </div>
+          <h4 class="project-card-title">
+            <a href="{{ url_for('showcase.detail', project_id=p.id) }}">{{ p.title }}</a>
+          </h4>
+          <p class="project-pitch">{{ p.pitch }}</p>
+          <div class="project-tags-row">
+            {% for tag in p.tech_tags_list %}
+              <span class="project-tag">{{ tag }}</span>
+            {% endfor %}
+          </div>
+          <div class="project-card-footer">
+            <span>By <strong>{{ p.team_name }}</strong></span>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              {% if p.judge_count > 0 and p.event.results_published %}
+                <span title="Average Judge Score" style="background: #F5F3FF; color: var(--violet); padding: 0.15rem 0.45rem; border-radius: var(--radius-sm); font-weight: 700;">
+                  &#9733; {{ p.average_judge_score }}/60
+                </span>
+              {% endif %}
+              <span style="font-family: var(--font-mono); font-weight: 700; color: var(--midnight-navy);">
+                &#9650; {{ p.upvote_count }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if total_pages > 1 %}
+    <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
+      {% if page > 1 %}
+        <a href="{{ url_for('showcase.home', page=page-1, event=current_event_id, track=current_track, tag=current_tag, demo_mode=current_demo, sort=sort_by) }}" class="btn-editorial-outline">
+          &larr; Previous
+        </a>
+      {% endif %}
+      <span style="display: inline-flex; align-items: center; padding: 0 1rem; font-weight: 700; color: var(--midnight-navy);">
+        Page {{ page }} of {{ total_pages }}
+      </span>
+      {% if page < total_pages %}
+        <a href="{{ url_for('showcase.home', page=page+1, event=current_event_id, track=current_track, tag=current_tag, demo_mode=current_demo, sort=sort_by) }}" class="btn-editorial-outline">
+          Next &rarr;
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+{% else %}
+  <div class="empty-showcase-card">
+    <h4>No showcase projects found</h4>
+    <p style="color: var(--muted-text); margin-bottom: 1.5rem;">
+      Try adjusting your filters or be the first team to submit a project for this hackathon!
+    </p>
+    <a href="{{ url_for('showcase.create_project') }}" class="btn-gradient-pill">
+      + Submit Project Demo
+    </a>
+  </div>
+{% endif %}
+
+{% endblock %}

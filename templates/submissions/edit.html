@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Submission #{{ submission.id }} - {{ config_data.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 820px; margin: 1rem auto;">
+  <div style="margin-bottom: 1.5rem;">
+    <a href="{{ url_for('submissions.detail', submission_id=submission.id) }}">&larr; Cancel & Return to Details</a>
+    <h1 style="color: var(--primary-color); margin-top: 0.5rem; margin-bottom: 0.2rem;">
+      Edit Submission #{{ submission.id }}
+    </h1>
+    <p style="color: var(--text-muted);">
+      Update your contribution details or address feedback requested by the review team.
+    </p>
+  </div>
+
+  <article style="background: var(--card-bg); padding: 2rem; border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+    <form method="POST" action="{{ url_for('submissions.edit', submission_id=submission.id) }}">
+      {{ form.hidden_tag() }}
+
+      <label>
+        <strong>Category:</strong>
+        <span class="badge" style="display: inline-flex; align-items: center; gap: 0.35rem; margin-left: 0.5rem;">
+          <img src="{{ url_for('static', filename='icons/icon-' + submission.category + '.svg') }}" class="site-icon" alt="">
+          {{ config_data.CATEGORIES.get(submission.category, {}).get('name') }}
+        </span>
+      </label>
+
+      <label for="title">
+        Title
+        {{ form.title(id="title", required=True) }}
+        {% for error in form.title.errors %}
+          <small style="color: #dc2626;">{{ error }}</small>
+        {% endfor %}
+      </label>
+
+      <label for="summary">
+        Short Summary
+        {{ form.summary(id="summary", required=True) }}
+        {% for error in form.summary.errors %}
+          <small style="color: #dc2626;">{{ error }}</small>
+        {% endfor %}
+      </label>
+
+      <label for="details">
+        Full Details
+        {{ form.details(rows=6, id="details", required=True) }}
+        {% for error in form.details.errors %}
+          <small style="color: #dc2626;">{{ error }}</small>
+        {% endfor %}
+      </label>
+
+      <!-- Category specific fields -->
+      {% if submission.category == 'idea' %}
+        <div style="padding: 1rem; background: #fffbeb; border-radius: var(--radius-sm); margin: 1rem 0;">
+          <label>Expected Impact {{ form.idea_impact() }}</label>
+          <label>Resources Needed {{ form.idea_resources() }}</label>
+        </div>
+      {% elif submission.category == 'research' %}
+        <div style="padding: 1rem; background: #eff6ff; border-radius: var(--radius-sm); margin: 1rem 0;">
+          <label>Methodology {{ form.research_methodology() }}</label>
+          <label>Key Results {{ form.research_results() }}</label>
+          <label>Paper Link / DOI {{ form.research_link() }}</label>
+        </div>
+      {% elif submission.category == 'correction' %}
+        <div style="padding: 1rem; background: #faf5ff; border-radius: var(--radius-sm); margin: 1rem 0;">
+          <label>Item Being Corrected {{ form.correction_item() }}</label>
+          <label>What is Wrong {{ form.correction_wrong() }}</label>
+          <label>What is Correct {{ form.correction_correct() }}</label>
+          <label>Evidence / Citation {{ form.correction_evidence() }}</label>
+        </div>
+      {% elif submission.category == 'infrastructure' %}
+        <div style="padding: 1rem; background: #ecfdf5; border-radius: var(--radius-sm); margin: 1rem 0;">
+          <label>Location {{ form.infra_location() }}</label>
+          <label>Problem Observed {{ form.infra_problem() }}</label>
+          <label>Proposed Solution {{ form.infra_solution() }}</label>
+          <label>Priority {{ form.infra_priority() }}</label>
+        </div>
+      {% endif %}
+
+      <label for="tags">
+        Tags (comma separated)
+        {{ form.tags() }}
+      </label>
+
+      <label for="anonymous_public" style="display: flex; align-items: center; gap: 0.5rem; margin: 1rem 0;">
+        {{ form.anonymous_public() }}
+        <span>Submit anonymously to public feed</span>
+      </label>
+
+      <button type="submit" class="btn-accent" style="width: 100%; margin-top: 1rem;">
+        Save Changes
+      </button>
+    </form>
+  </article>
+</div>
+{% endblock %}

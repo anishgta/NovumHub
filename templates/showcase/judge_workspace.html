@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if mode == 'dashboard' %}Judge Workspace - {{ config_data.SHOWCASE_NAME }}{% else %}Evaluating: {{ project.title }}{% endif %}
+{% endblock %}
+
+{% block content %}
+
+{% if mode == 'dashboard' %}
+  <!-- DASHBOARD MODE -->
+  <div style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+      <div>
+        <div class="hero-pill-badge" style="margin-bottom: 0.5rem;">
+          <span class="pulsing-dot"></span>
+          <span>Judge & Faculty Evaluation Console</span>
+        </div>
+        <h1 style="font-size: 2.2rem; font-weight: 800; color: var(--midnight-navy); margin: 0;">
+          Judge Workspace
+        </h1>
+      </div>
+
+      <!-- Event Switcher -->
+      <form method="GET" action="{{ url_for('showcase.judge_dashboard') }}" style="margin: 0;">
+        <select name="event" onchange="this.form.submit()" style="margin: 0; min-width: 240px;">
+          {% for ev in events %}
+            <option value="{{ ev.id }}" {% if selected_event and selected_event.id == ev.id %}selected{% endif %}>
+              {{ ev.name }} ({{ ev.year }})
+            </option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+
+    <!-- Rubric Guide Banner -->
+    <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2rem;">
+      <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 0.5rem;">
+        Official Evaluation Rubric (6 Criteria &bull; 60 Total Points)
+      </h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; font-size: 0.85rem;">
+        {% for crit_key, crit_meta in rubric.items() %}
+          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; padding: 0.75rem; border-radius: var(--radius-sm);">
+            <strong style="color: var(--midnight-navy);">{{ crit_meta.label }}</strong>
+            <div style="color: var(--violet); font-weight: 700; margin-bottom: 0.25rem;">Max 10 pts (Weight {{ crit_meta.weight }})</div>
+            <div style="color: #64748B; font-size: 0.78rem;">{{ crit_meta.desc }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Projects Table -->
+    {% if selected_event %}
+      <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; box-shadow: var(--shadow-sm);">
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 1rem;">
+          Submissions for {{ selected_event.name }} ({{ projects|length }})
+        </h3>
+
+        {% if projects %}
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 2px solid #E2E8F0; text-align: left; font-size: 0.85rem; color: #64748B;">
+                <th style="padding: 0.6rem;">Project Title</th>
+                <th style="padding: 0.6rem;">Track</th>
+                <th style="padding: 0.6rem;">Team</th>
+                <th style="padding: 0.6rem;">Demo Mode</th>
+                <th style="padding: 0.6rem; text-align: center;">Your Evaluation</th>
+                <th style="padding: 0.6rem; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in projects %}
+                {% set sc = my_scores.get(p.id) %}
+                <tr style="border-bottom: 1px solid #E2E8F0; font-size: 0.9rem;">
+                  <td style="padding: 0.85rem 0.6rem;">
+                    <strong><a href="{{ url_for('showcase.detail', project_id=p.id) }}">{{ p.title }}</a></strong>
+                  </td>
+                  <td style="padding: 0.85rem 0.6rem; color: #475569;">{{ p.track }}</td>
+                  <td style="padding: 0.85rem 0.6rem; color: #64748B;">{{ p.team_name }}</td>
+                  <td style="padding: 0.85rem 0.6rem;">
+                    <span class="project-tag">{{ p.demo_mode_label }}</span>
+                  </td>
+                  <td style="padding: 0.85rem 0.6rem; text-align: center;">
+                    {% if sc %}
+                      <span style="font-family: var(--font-mono); font-weight: 800; color: #059669; background: #ECFDF5; padding: 0.25rem 0.65rem; border-radius: var(--radius-full);">
+                        {{ sc.total_score }} / 60
+                      </span>
+                    {% else %}
+                      <span style="color: #94A3B8; font-size: 0.82rem; font-style: italic;">
+                        Pending Review
+                      </span>
+                    {% endif %}
+                  </td>
+                  <td style="padding: 0.85rem 0.6rem; text-align: right;">
+                    <a href="{{ url_for('showcase.judge_project', project_id=p.id) }}" class="btn-editorial-primary" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">
+                      {% if sc %}Update Score{% else %}Score Project &rarr;{% endif %}
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="empty-showcase-card">
+            No published projects found for this event yet.
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+{% else %}
+  <!-- SCORING WORKSPACE MODE (Side-by-Side) -->
+  <div style="margin-bottom: 1.5rem;">
+    <a href="{{ url_for('showcase.judge_dashboard', event=project.event_id) }}" class="btn-editorial-outline" style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">
+      &larr; Back to Judge Dashboard
+    </a>
+  </div>
+
+  <div class="judge-workspace-split">
+    <!-- LEFT COLUMN: Project Details, Demo Preview & Assets -->
+    <div>
+      <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem; margin-bottom: 1.5rem;">
+        <span class="category-pill-tag tag-idea">{{ project.event.name }}</span>
+        <span class="category-pill-tag tag-research">{{ project.track }}</span>
+        <h2 style="font-size: 1.85rem; font-weight: 800; color: var(--midnight-navy); margin: 0.4rem 0;">
+          {{ project.title }}
+        </h2>
+        <p style="color: #475569; font-size: 1rem; line-height: 1.5; margin-bottom: 1rem;">
+          {{ project.pitch }}
+        </p>
+        <div style="font-size: 0.85rem; color: #64748B;">
+          <strong>Team:</strong> {{ project.team_name }} &bull; 
+          {% if project.repo_url %}
+            <a href="{{ project.repo_url }}" target="_blank" rel="noopener noreferrer">Code Repository &rarr;</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Demo Viewport -->
+      {% if project.demo_mode == 'hosted_webgl' and project.demo_entry_path and not project.demo_disabled %}
+        <div class="demo-viewport-container">
+          <div class="demo-stage-toolbar">
+            <span>Sandboxed WebGL / HTML5 Live Build</span>
+            <button onclick="var f=document.getElementById('judge-demo-frame'); if(f.requestFullscreen){f.requestFullscreen();}" class="btn-glass-pill" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">
+              Fullscreen
+            </button>
+          </div>
+          <div class="demo-stage-iframe-wrap" style="height: 480px;">
+            <iframe id="judge-demo-frame"
+                    src="{{ url_for('showcase.serve_demo', project_id=project.id, filename='index.html') }}"
+                    sandbox="allow-scripts allow-pointer-lock allow-fullscreen"
+                    title="Judge Demo Preview">
+            </iframe>
+          </div>
+        </div>
+      {% elif project.demo_mode == 'external_embed' and project.demo_external_url %}
+        <div class="demo-viewport-container">
+          <div class="demo-stage-toolbar">
+            <span>External Embed</span>
+            <a href="{{ project.demo_external_url }}" target="_blank" class="btn-glass-pill" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">New Tab &rarr;</a>
+          </div>
+          <div class="demo-stage-iframe-wrap" style="height: 480px;">
+            <iframe src="{{ project.demo_external_url }}" sandbox="allow-scripts allow-pointer-lock allow-fullscreen allow-same-origin"></iframe>
+          </div>
+        </div>
+      {% elif pdf_asset %}
+        <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem;">
+          <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem;">Presentation Deck</h4>
+          <a href="{{ url_for('showcase.download_asset', asset_id=pdf_asset.id) }}" target="_blank" class="btn-editorial-primary" style="font-size: 0.88rem;">
+            &#128065; Open Presentation Deck (PDF) in New Tab &rarr;
+          </a>
+        </div>
+      {% endif %}
+
+      <!-- Dev Notes Overview -->
+      <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem; margin-top: 1.5rem;">
+        <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 1rem;">
+          Developer Notes
+        </h3>
+        {% if project.dev_notes|length > 0 %}
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for note in project.dev_notes %}
+              <details style="border-bottom: 1px solid var(--border-light); padding-bottom: 0.5rem;">
+                <summary style="font-weight: 700; cursor: pointer; color: var(--midnight-navy);">
+                  {{ config_data.SHOWCASE_DEVNOTE_SECTIONS.get(note.section_key, note.section_key) }}
+                </summary>
+                <div style="padding-top: 0.5rem; font-size: 0.9rem; color: #334155;">
+                  <pre style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 0.75rem; border-radius: var(--radius-sm); white-space: pre-wrap; font-family: var(--font-sans);">{{ note.body_markdown }}</pre>
+                </div>
+              </details>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p style="color: var(--muted-text); font-size: 0.9rem;">No developer notes provided.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: RUBRIC FORM -->
+    <div class="judge-rubric-card">
+      <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 0.3rem;">
+        Evaluation Rubric
+      </h3>
+      <p style="color: var(--muted-text); font-size: 0.85rem; margin-bottom: 1.25rem;">
+        Score each criterion from 0 to 10. The total score will be calculated automatically.
+      </p>
+
+      <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="rubric-score-display">
+          <span>Total Rubric Score:</span>
+          <span id="live-total-display" style="color: var(--violet); font-family: var(--font-mono);">
+            {{ score.total_score if score else '0' }} / 60
+          </span>
+        </div>
+
+        {% set fields = [
+          ('innovation', 'Innovation & Originality', 'Uniqueness and creative problem-solving'),
+          ('technical_depth', 'Technical Depth', 'Architectural complexity, code quality, technical rigor'),
+          ('completeness', 'Completeness & Functionality', 'Working demo, error resilience, execution level'),
+          ('design_ux', 'Design & UX', 'Usability, interface polish, ergonomics, responsiveness'),
+          ('presentation', 'Presentation & Documentation', 'Slide deck clarity, dev notes, repository hygiene'),
+          ('impact', 'Impact & Viability', 'Real-world utility, campus/societal benefit, scaling potential')
+        ] %}
+
+        {% for f_name, f_title, f_hint in fields %}
+          <div class="rubric-field-row">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label for="{{ f_name }}">{{ loop.index }}. {{ f_title }}</label>
+              <span id="val-{{ f_name }}" style="font-family: var(--font-mono); font-weight: 800; color: var(--electric-blue);">
+                {{ form[f_name].data or 0 }}/10
+              </span>
+            </div>
+            <div style="font-size: 0.78rem; color: #64748B; margin-bottom: 0.4rem;">{{ f_hint }}</div>
+            {{ form[f_name](type="range", min="0", max="10", step="1", oninput="updateLiveScore('" ~ f_name ~ "', this.value)", style="width: 100%;") }}
+          </div>
+        {% endfor %}
+
+        <div style="margin-bottom: 1.25rem;">
+          <label style="font-weight: 700; font-size: 0.9rem; color: var(--midnight-navy); display: block; margin-bottom: 0.3rem;">
+            Private Feedback (Admins & Judges Only)
+          </label>
+          {{ form.private_feedback(rows=3, placeholder="Confidential evaluation notes for judging panel deliberations...") }}
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label style="font-weight: 700; font-size: 0.9rem; color: var(--midnight-navy); display: block; margin-bottom: 0.3rem;">
+            Public Constructive Feedback (Visible to Team)
+          </label>
+          {{ form.public_feedback(rows=3, placeholder="Constructive advice and congratulations visible to the student team...") }}
+        </div>
+
+        <button type="submit" class="btn-editorial-primary" style="width: 100%; font-size: 1rem; padding: 0.85rem;">
+          &#10003; Submit Project Evaluation
+        </button>
+      </form>
+
+      <script>
+        function updateLiveScore(name, val) {
+          var valEl = document.getElementById('val-' + name);
+          if (valEl) valEl.innerText = val + '/10';
+          
+          var fields = ['innovation', 'technical_depth', 'completeness', 'design_ux', 'presentation', 'impact'];
+          var total = 0;
+          fields.forEach(function(f) {
+            var input = document.getElementsByName(f)[0];
+            if (input) total += parseInt(input.value || 0, 10);
+          });
+          document.getElementById('live-total-display').innerText = total + ' / 60';
+        }
+      </script>
+    </div>
+  </div>
+{% endif %}
+
+{% endblock %}

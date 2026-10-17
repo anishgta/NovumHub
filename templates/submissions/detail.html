@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ submission.title }} - {{ config_data.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<!-- EDIT HERE: Submission Detail Page -->
+<div style="max-width: 920px; margin: 1rem auto;">
+
+  <!-- Breadcrumbs & Back Link -->
+  <div style="margin-bottom: 1.25rem;">
+    <a href="{{ url_for('submissions.browse') }}" style="font-size: 0.9rem;">&larr; Back to Feed</a>
+  </div>
+
+  <article style="background: var(--card-bg); padding: 2.25rem; border: 2px solid var(--border-color); box-shadow: var(--shadow-md); margin-bottom: 2rem;">
+    
+    <!-- Header: Category & Status Badges -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+      <div class="badges-row">
+        <span class="badge badge-{{ submission.category }}">
+          <img src="{{ url_for('static', filename='icons/icon-' + submission.category + '.svg') }}" class="site-icon" alt="">
+          {{ config_data.CATEGORIES.get(submission.category, {}).get('name') }}
+        </span>
+
+        {% set status_val = submission.status %}
+        {% include 'partials/status_badge.html' %}
+      </div>
+
+      <!-- Upvote Button -->
+      <div>
+        <button 
+          type="button" 
+          class="upvote-btn ajax-upvote-btn {% if current_user.is_authenticated and submission.has_upvoted(current_user) %}upvoted{% endif %}"
+          data-id="{{ submission.id }}"
+          title="Upvote this contribution"
+        >
+          <span class="upvote-icon"><img src="{{ url_for('static', filename='icons/icon-vote.svg') }}" class="site-icon" alt=""></span>
+          <span class="upvote-count">{{ submission.upvote_count }}</span>
+          <span>Upvotes</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Title -->
+    <h1 style="color: var(--primary-color); font-size: 2.1rem; margin-bottom: 0.8rem;">
+      {{ submission.title }}
+    </h1>
+
+    <!-- Metadata -->
+    <div class="meta-row" style="margin-bottom: 1.5rem;">
+      <span>
+        <img src="{{ url_for('static', filename='icons/icon-user.svg') }}" class="site-icon" alt="">
+        Submitted by:
+        {% if submission.anonymous_public and not (current_user.is_authenticated and (current_user.id == submission.author_id or current_user.is_reviewer)) %}
+          <strong>Anonymous Student</strong>
+        {% else %}
+          <strong>{{ submission.author.name }}</strong>
+          {% if submission.author.department %} ({{ submission.author.department }}){% endif %}
+          {% if submission.anonymous_public %}
+            <small style="color: var(--text-muted);">(marked anonymous to public)</small>
+          {% endif %}
+        {% endif %}
+      </span>
+      <span>&bull; <img src="{{ url_for('static', filename='icons/icon-calendar.svg') }}" class="site-icon" alt=""> {{ submission.created_at.strftime('%d %B %Y, %I:%M %p') }}</span>
+      {% if submission.author.display_registration_no and (current_user.is_admin or (current_user.is_authenticated and current_user.id == submission.author_id)) %}
+        <span>&bull; Reg No: {{ submission.author.display_registration_no }}</span>
+      {% endif %}
+    </div>
+
+    <!-- Summary Callout -->
+    <div style="background: #f8fafc; border-left: 4px solid var(--primary-color); border-top: 1px solid var(--border-light); border-right: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); padding: 1.1rem 1.4rem; margin-bottom: 1.5rem;">
+      <h5 style="margin-bottom: 0.3rem; color: var(--primary-color); text-transform: uppercase; font-size: 0.78rem; letter-spacing: 0.08em; font-family: var(--font-mono);">Summary</h5>
+      <p style="margin: 0; font-size: 1.05rem; font-weight: 500;">{{ submission.summary }}</p>
+    </div>
+
+    <!-- Full Detailed Description -->
+    <div style="margin-bottom: 2rem; line-height: 1.7;">
+      <h4 style="margin-bottom: 0.5rem;">Detailed Write-up</h4>
+      <div style="white-space: pre-wrap; color: var(--text-main); font-size: 1rem;">{{ submission.details }}</div>
+    </div>
+
+    <!-- ====================================================================
+         CATEGORY-SPECIFIC EXTRA FIELDS DISPLAY
+         ==================================================================== -->
+    {% set extra = submission.extra_fields %}
+
+    {% if submission.category == 'idea' and (extra.get('expected_impact') or extra.get('resources_needed')) %}
+      <div style="background: #fffbeb; border: 2px solid #fde68a; padding: 1.25rem; margin-bottom: 1.5rem;">
+        <h4 style="color: #92400e; margin-bottom: 0.6rem;">
+          <img src="{{ url_for('static', filename='icons/icon-idea.svg') }}" class="site-icon" alt=""> Idea Specifications
+        </h4>
+        {% if extra.get('expected_impact') %}
+          <p style="margin-bottom: 0.5rem;"><strong>Expected Impact:</strong> {{ extra.get('expected_impact') }}</p>
+        {% endif %}
+        {% if extra.get('resources_needed') %}
+          <p style="margin: 0;"><strong>Resources / Equipment Needed:</strong> {{ extra.get('resources_needed') }}</p>
+        {% endif %}
+      </div>
+
+    {% elif submission.category == 'research' and (extra.get('methodology') or extra.get('key_results') or extra.get('link_or_doi')) %}
+      <div style="background: #eff6ff; border: 2px solid #bfdbfe; padding: 1.25rem; margin-bottom: 1.5rem;">
+        <h4 style="color: #1e40af; margin-bottom: 0.6rem;">
+          <img src="{{ url_for('static', filename='icons/icon-research.svg') }}" class="site-icon" alt=""> Research Findings & Setup
+        </h4>
+        {% if extra.get('methodology') %}
+          <p style="margin-bottom: 0.5rem;"><strong>Methodology:</strong> {{ extra.get('methodology') }}</p>
+        {% endif %}
+        {% if extra.get('key_results') %}
+          <p style="margin-bottom: 0.5rem;"><strong>Key Findings:</strong> {{ extra.get('key_results') }}</p>
+        {% endif %}
+        {% if extra.get('link_or_doi') %}
+          <p style="margin: 0;"><strong>Reference Link / DOI:</strong> <a href="{{ extra.get('link_or_doi') }}" target="_blank" rel="noopener">{{ extra.get('link_or_doi') }}</a></p>
+        {% endif %}
+      </div>
+
+    {% elif submission.category == 'correction' %}
+      <div style="background: #faf5ff; border: 2px solid #e9d5ff; padding: 1.25rem; margin-bottom: 1.5rem;">
+        <h4 style="color: #5b21b6; margin-bottom: 0.6rem;">
+          <img src="{{ url_for('static', filename='icons/icon-correction.svg') }}" class="site-icon" alt=""> Academic Correction Verification
+        </h4>
+        <p style="margin-bottom: 0.4rem;"><strong>Item Being Corrected:</strong> {{ extra.get('item_corrected') }}</p>
+        <p style="margin-bottom: 0.4rem; color: #991b1b;"><strong>What is Wrong:</strong> {{ extra.get('what_is_wrong') }}</p>
+        <p style="margin-bottom: 0.4rem; color: #166534;"><strong>Correct Information:</strong> {{ extra.get('what_is_correct') }}</p>
+        <p style="margin: 0;"><strong>Evidence / Citation:</strong> <em>{{ extra.get('evidence_source') }}</em></p>
+      </div>
+
+    {% elif submission.category == 'infrastructure' %}
+      <div style="background: #ecfdf5; border: 2px solid #a7f3d0; padding: 1.25rem; margin-bottom: 1.5rem;">
+        <h4 style="color: #065f46; margin-bottom: 0.6rem;">
+          <img src="{{ url_for('static', filename='icons/icon-infrastructure.svg') }}" class="site-icon" alt=""> Infrastructure Details
+        </h4>
+        <p style="margin-bottom: 0.4rem;"><strong>Location:</strong> {{ extra.get('location') }}</p>
+        {% if extra.get('problem') %}
+          <p style="margin-bottom: 0.4rem;"><strong>Current Issue:</strong> {{ extra.get('problem') }}</p>
+        {% endif %}
+        {% if extra.get('solution') %}
+          <p style="margin-bottom: 0.4rem;"><strong>Proposed Fix:</strong> {{ extra.get('solution') }}</p>
+        {% endif %}
+        <p style="margin: 0;"><strong>Priority Level:</strong> <span class="badge">{{ extra.get('priority', 'Medium') }}</span></p>
+      </div>
+    {% endif %}
+
+    <!-- Attachment link with SVG icon -->
+    {% if submission.attachment_path %}
+      <div style="margin-bottom: 1.5rem; padding: 1rem 1.25rem; background: #f1f5f9; border: 1.5px solid var(--border-light); display: flex; align-items: center; justify-content: space-between;">
+        <span>
+          <img src="{{ url_for('static', filename='icons/icon-attachment.svg') }}" class="site-icon" alt="">
+          <strong>Supporting Attachment:</strong> {{ submission.attachment_path }}
+        </span>
+        <a href="{{ url_for('submissions.uploaded_file', filename=submission.attachment_path) }}" target="_blank" role="button" class="btn-accent" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
+          View / Download File
+        </a>
+      </div>
+    {% endif %}
+
+    <!-- Tags Row -->
+    {% if submission.tags %}
+      <div style="margin-bottom: 1.5rem;">
+        {% for tag in submission.tags.split(',') %}
+          {% if tag.strip() %}
+            <span class="tag-badge">#{{ tag.strip() }}</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Author Actions (Edit or Withdraw) -->
+    {% if current_user.is_authenticated and (current_user.id == submission.author_id or current_user.is_admin) %}
+      <div style="display: flex; gap: 0.8rem; border-top: 2px solid var(--border-light); padding-top: 1.25rem; margin-top: 1.5rem; flex-wrap: wrap;">
+        {% if submission.status in ('Submitted', 'Needs Changes') or current_user.is_admin %}
+          <a href="{{ url_for('submissions.edit', submission_id=submission.id) }}" role="button" class="outline" style="padding: 0.35rem 0.8rem; font-size: 0.85rem;">
+            <img src="{{ url_for('static', filename='icons/icon-edit.svg') }}" class="site-icon" alt=""> Edit Submission
+          </a>
+        {% endif %}
+
+        {% if submission.status == 'Submitted' or current_user.is_admin %}
+          <form method="POST" action="{{ url_for('submissions.withdraw', submission_id=submission.id) }}" onsubmit="return confirm('Are you sure you want to withdraw and delete this submission?');" style="margin: 0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" style="background: transparent; color: #dc2626; border: 2px solid #dc2626; padding: 0.35rem 0.8rem; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
+              <img src="{{ url_for('static', filename='icons/icon-trash.svg') }}" class="site-icon" alt=""> Withdraw Submission
+            </button>
+          </form>
+        {% endif %}
+
+        {% if current_user.is_reviewer %}
+          <a href="{{ url_for('review.triage', submission_id=submission.id) }}" role="button" class="btn-accent" style="padding: 0.35rem 0.8rem; font-size: 0.85rem;">
+            <img src="{{ url_for('static', filename='icons/icon-search.svg') }}" class="site-icon" alt=""> Open in Review Queue
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  </article>
+
+  <!-- ========================================================================
+       STATUS TIMELINE (LIFECYCLE HISTORY)
+       ======================================================================== -->
+  <section style="background: var(--card-bg); padding: 2.25rem; border: 2px solid var(--border-color); box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1.25rem; color: var(--primary-color);">Status Timeline & Feedback</h3>
+    
+    <div class="timeline">
+      {% for event in submission.status_history %}
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-header">
+            Status: <strong>{{ event.to_status }}</strong>
+            {% if event.from_status != 'None' %}
+              <small style="color: var(--text-muted); font-weight: normal;">(changed from {{ event.from_status }})</small>
+            {% endif %}
+          </div>
+          <div class="timeline-date">
+            {{ event.created_at.strftime('%d %b %Y, %I:%M %p') }} &bull;
+            {% if current_user.is_authenticated and current_user.is_reviewer %}
+              Updated by: {{ event.actor.name }} ({{ event.actor.role }})
+            {% else %}
+              Updated by: Review Team
+            {% endif %}
+          </div>
+
+          <!-- Public Comment / Official Feedback -->
+          {% if event.public_comment %}
+            <div class="timeline-comment">
+              <strong>Official Feedback:</strong> {{ event.public_comment }}
+            </div>
+          {% endif %}
+
+          <!-- Reviewer Internal Note (Visible ONLY to Reviewers) -->
+          {% if event.internal_note and current_user.is_authenticated and current_user.is_reviewer %}
+            <div class="internal-note-box">
+              <strong>[INTERNAL REVIEWER NOTE]:</strong> {{ event.internal_note }}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       COMMUNITY DISCUSSION & COMMENTS
+       ======================================================================== -->
+  <section style="background: var(--card-bg); padding: 2.25rem; border: 2px solid var(--border-color); box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h3 style="margin: 0; color: var(--primary-color);">
+        Discussion ({{ submission.comments|length }})
+      </h3>
+
+      <!-- Report Button -->
+      <details class="dropdown" style="margin: 0;">
+        <summary style="font-size: 0.8rem; padding: 0.25rem 0.5rem; color: var(--text-muted);">
+          <img src="{{ url_for('static', filename='icons/icon-flag.svg') }}" class="site-icon" alt=""> Report
+        </summary>
+        <div style="padding: 1rem; width: 280px; background: #fff; box-shadow: var(--shadow-md); border: 2px solid var(--border-color);">
+          <form method="POST" action="{{ url_for('submissions.report', submission_id=submission.id) }}">
+            {{ report_form.hidden_tag() }}
+            <label style="font-size: 0.85rem;">
+              Reason:
+              {{ report_form.reason(style="font-size: 0.85rem;") }}
+            </label>
+            <label style="font-size: 0.85rem;">
+              Details:
+              {{ report_form.details(rows=2, style="font-size: 0.85rem;") }}
+            </label>
+            {{ report_form.submit(class="outline", style="width: 100%; font-size: 0.85rem; padding: 0.3rem;") }}
+          </form>
+        </div>
+      </details>
+    </div>
+
+    <!-- Existing Comments List -->
+    {% if submission.comments %}
+      <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
+        {% for comment in submission.comments %}
+          <div style="padding: 1rem; background: #f8fafc; border: 1.5px solid var(--border-light);">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem;">
+              <span style="font-weight: 700; font-size: 0.92rem;">
+                <img src="{{ url_for('static', filename='icons/icon-user.svg') }}" class="site-icon" alt=""> {{ comment.author.name }}
+                {% if comment.author.role in ('reviewer', 'admin') %}
+                  <span class="badge" style="background: var(--accent-light); color: var(--accent-color); font-size: 0.7rem; margin-left: 0.3rem;">Reviewer</span>
+                {% endif %}
+              </span>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <small style="color: var(--text-muted); font-family: var(--font-mono); font-size: 0.78rem;">{{ comment.created_at.strftime('%d %b %Y, %I:%M %p') }}</small>
+                {% if current_user.is_authenticated and (current_user.is_reviewer or current_user.id == comment.author_id) %}
+                  <form method="POST" action="{{ url_for('review.delete_comment', comment_id=comment.id) }}" style="margin: 0;" onsubmit="return confirm('Delete this comment?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" style="background: none; border: none; color: #dc2626; cursor: pointer; padding: 0; display: inline-flex; align-items: center;" title="Delete comment">
+                      <img src="{{ url_for('static', filename='icons/icon-trash.svg') }}" class="site-icon" alt="Delete" style="width: 14px; height: 14px;">
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+            </div>
+
+            {% if comment.is_deleted %}
+              <p style="margin: 0; color: var(--text-muted); font-style: italic; font-size: 0.9rem;">
+                [This comment was removed by a moderator]
+              </p>
+            {% else %}
+              <p style="margin: 0; color: var(--text-main); font-size: 0.95rem; white-space: pre-wrap;">
+                {{ comment.body }}
+              </p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+        No comments yet. Be the first to share your thoughts or questions!
+      </p>
+    {% endif %}
+
+    <!-- Post Comment Form -->
+    {% if current_user.is_authenticated %}
+      <form method="POST" action="{{ url_for('submissions.add_comment', submission_id=submission.id) }}">
+        {{ comment_form.hidden_tag() }}
+        <label for="body">
+          <strong>Leave a Comment</strong>
+          {{ comment_form.body(rows=3, placeholder="Share constructive feedback, offer to collaborate, or ask questions...") }}
+        </label>
+        {{ comment_form.submit(class="btn-accent", style="padding: 0.35rem 1rem;") }}
+      </form>
+    {% else %}
+      <div style="background: #f1f5f9; padding: 1rem; border: 1.5px solid var(--border-light); text-align: center;">
+        <p style="margin: 0; font-size: 0.9rem;">
+          <a href="{{ url_for('auth.login', next=request.path) }}">Log in</a> or <a href="{{ url_for('auth.register') }}">register</a> to participate in the discussion.
+        </p>
+      </div>
+    {% endif %}
+
+  </section>
+
+</div>
+{% endblock %}

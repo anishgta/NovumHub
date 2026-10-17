@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 380" fill="none">
+  <defs>
+    <!-- Soft Organic Pastel Pink/Lavender Blob Gradient -->
+    <linearGradient id="blobCorrection" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCE7F3" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#F5F3FF" stop-opacity="0.6"/>
+    </linearGradient>
+    <linearGradient id="puzzleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F472B6"/>
+      <stop offset="50%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#4D7CFF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Organic amorphous background shape (matches reference backdrop) -->
+  <path d="M100,100 C40,60 50,180 80,260 C110,340 220,350 310,330 C400,310 420,220 390,140 C360,60 280,30 200,40 C140,50 140,120 100,100 Z" 
+        fill="url(#blobCorrection)"/>
+
+  <!-- Subtle glowing hearts and academic sparkles floating -->
+  <circle cx="85" cy="85" r="3.5" fill="#F472B6" opacity="0.5"/>
+  <circle cx="395" cy="95" r="4" fill="#8B5CF6" opacity="0.4"/>
+  <circle cx="380" cy="310" r="3" fill="#4D7CFF" opacity="0.4"/>
+  <circle cx="75" cy="270" r="4.5" fill="#EC4899" opacity="0.3"/>
+
+  <!-- TWO FLOATING FIGURES BRINGING TOGETHER THE PUZZLE (Matches Reference Design) -->
+  
+  <!-- LEFT FLOATING FIGURE (Leaning diagonally into center) -->
+  <g transform="translate(60, 110)">
+    <!-- Head & Hair -->
+    <ellipse cx="60" cy="70" rx="13" ry="15" stroke="#090B2A" stroke-width="2.5" fill="#ffffff"/>
+    <path d="M50 65 C 45 55, 62 50, 68 56 C 72 60, 70 70, 64 72" stroke="#4D7CFF" stroke-width="2.5" fill="none"/>
+    
+    <!-- Torso floating upward -->
+    <path d="M52 85 C 40 105, 30 140, 20 170 C 40 175, 75 160, 80 140 C 80 115, 75 95, 68 85 Z" 
+          stroke="#4D7CFF" stroke-width="2.5" fill="#ffffff" fill-opacity="0.85"/>
+    
+    <!-- Left Arm holding left puzzle half -->
+    <path d="M68 95 C 80 90, 105 85, 125 90" stroke="#090B2A" stroke-width="2.5" stroke-linecap="round"/>
+    
+    <!-- Floating Legs flowing back -->
+    <path d="M20 170 C 5 190, -10 215, -25 230 C -30 235, -20 240, -10 230 C 5 215, 20 190, 35 170" 
+          stroke="#4D7CFF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M28 165 C 15 185, 0 210, -10 220 C -15 225, -10 230, 0 220 C 15 205, 35 180, 48 160" 
+          stroke="#8B5CF6" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- RIGHT FLOATING FIGURE (Leaning symmetrically into center) -->
+  <g transform="translate(230, 110)">
+    <!-- Head & Hair -->
+    <ellipse cx="110" cy="70" rx="13" ry="15" stroke="#090B2A" stroke-width="2.5" fill="#ffffff"/>
+    <path d="M100 65 C 105 55, 122 50, 128 56 C 132 60, 125 70, 118 72" stroke="#F472B6" stroke-width="2.5" fill="none"/>
+    
+    <!-- Torso floating upward -->
+    <path d="M118 85 C 130 105, 140 140, 150 170 C 130 175, 95 160, 90 140 C 90 115, 95 95, 102 85 Z" 
+          stroke="#F472B6" stroke-width="2.5" fill="#ffffff" fill-opacity="0.85"/>
+    
+    <!-- Right Arm holding right puzzle half -->
+    <path d="M102 95 C 90 90, 65 85, 45 90" stroke="#090B2A" stroke-width="2.5" stroke-linecap="round"/>
+    
+    <!-- Floating Legs flowing back -->
+    <path d="M150 170 C 165 190, 180 215, 195 230 C 200 235, 190 240, 180 230 C 165 215, 150 190, 135 170" 
+          stroke="#F472B6" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M142 165 C 155 185, 170 210, 180 220 C 185 225, 180 230, 170 220 C 155 205, 135 180, 122 160" 
+          stroke="#EC4899" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- CENTRAL GLOWING PUZZLE HEART (Verified Academic Correction) -->
+  <g transform="translate(180, 140)">
+    <!-- Ambient pulse aura -->
+    <ellipse cx="50" cy="50" rx="55" ry="50" fill="#FDF2F8" opacity="0.6"/>
+
+    <!-- Left Puzzle Half (Held by left figure) -->
+    <path d="M50 20 C 30 -5, 0 10, 0 40 C 0 70, 30 85, 48 98 L 48 65 C 56 65, 56 45, 48 45 L 48 20 Z" 
+          fill="#ffffff" stroke="#4D7CFF" stroke-width="2.8" stroke-linejoin="round"/>
+    
+    <!-- Right Puzzle Half with interlocking notch (Held by right figure) -->
+    <path d="M52 20 C 72 -5, 102 10, 102 40 C 102 70, 72 85, 54 98 L 54 65 C 62 65, 62 45, 54 45 L 54 20 Z" 
+          fill="#ffffff" stroke="#F472B6" stroke-width="2.8" stroke-linejoin="round"/>
+
+    <!-- Sparkles of Truth & Citation Integrity at the seam -->
+    <circle cx="51" cy="55" r="4" fill="#F472B6"/>
+    <path d="M51 32 L 51 22 M51 78 L 51 88 M32 55 L 22 55 M70 55 L 80 55" stroke="url(#puzzleGrad)" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Open Academic Textbook / Document at Bottom with Verified Green Checkmark -->
+  <g transform="translate(190, 275)">
+    <!-- Book open pages -->
+    <path d="M40 10 C 25 5, 5 10, 0 18 L 0 45 C 10 38, 25 35, 40 40 C 55 35, 70 38, 80 45 L 80 18 C 75 10, 55 5, 40 10 Z" 
+          fill="#ffffff" stroke="#090B2A" stroke-width="2.2" stroke-linejoin="round"/>
+    <line x1="40" y1="10" x2="40" y2="40" stroke="#090B2A" stroke-width="2"/>
+    <line x1="8" y1="24" x2="32" y2="24" stroke="#CBD5E1" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="8" y1="32" x2="28" y2="32" stroke="#CBD5E1" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="48" y1="24" x2="72" y2="24" stroke="#4D7CFF" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="48" y1="32" x2="68" y2="32" stroke="#8B5CF6" stroke-width="1.8" stroke-linecap="round"/>
+    <!-- Verified Badge -->
+    <circle cx="72" cy="12" r="9" fill="#10B981" stroke="#ffffff" stroke-width="2"/>
+    <path d="M68 12 L71 15 L76 9" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

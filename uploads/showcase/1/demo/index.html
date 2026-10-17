@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>AIT Campus Navigator 3D - Live Build</title>
+<style>
+  body { margin: 0; background: #080A1A; color: #FFF; font-family: sans-serif; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+  canvas { border: 2px solid #8B5CF6; border-radius: 8px; box-shadow: 0 0 25px rgba(139,92,246,0.5); }
+  #hud { position: absolute; top: 15px; left: 20px; font-size: 14px; color: #C7D2FE; background: rgba(0,0,0,0.6); padding: 8px 14px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<div id="hud">AIT Campus 3D Node Mesh &bull; Move mouse to rotate camera</div>
+<canvas id="c" width="760" height="460"></canvas>
+<script>
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  let angle = 0, mouseX = 0, mouseY = 0;
+  c.addEventListener('mousemove', e => {
+    const r = c.getBoundingClientRect();
+    mouseX = (e.clientX - r.left - c.width/2) * 0.005;
+    mouseY = (e.clientY - r.top - c.height/2) * 0.005;
+  });
+  const nodes = [];
+  for(let i=0; i<45; i++) {
+    nodes.push({
+      x: (Math.random()-0.5)*350,
+      y: (Math.random()-0.5)*200,
+      z: (Math.random()-0.5)*350,
+      label: i % 8 === 0 ? ['Admin Block', 'Library', 'Mech Workshop', 'Hostel 4', 'Ramanujan Lab', 'Parade Ground'][i/8|0] : ''
+    });
+  }
+  function loop() {
+    angle += 0.015;
+    ctx.fillStyle = '#090B22';
+    ctx.fillRect(0, 0, c.width, c.height);
+    const ca = Math.cos(angle + mouseX), sa = Math.sin(angle + mouseX);
+    ctx.strokeStyle = 'rgba(139, 92, 246, 0.25)';
+    ctx.beginPath();
+    nodes.forEach((n, idx) => {
+      const rx = n.x * ca - n.z * sa;
+      const rz = n.x * sa + n.z * ca + 400;
+      const f = 380 / rz;
+      const sx = c.width/2 + rx * f;
+      const sy = c.height/2 + (n.y + mouseY*80) * f;
+      if(idx === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+    });
+    ctx.stroke();
+    nodes.forEach(n => {
+      const rx = n.x * ca - n.z * sa;
+      const rz = n.x * sa + n.z * ca + 400;
+      const f = 380 / rz;
+      const sx = c.width/2 + rx * f;
+      const sy = c.height/2 + (n.y + mouseY*80) * f;
+      ctx.fillStyle = n.label ? '#10B981' : '#8B5CF6';
+      ctx.beginPath();
+      ctx.arc(sx, sy, n.label ? 6 : 3, 0, Math.PI*2);
+      ctx.fill();
+      if(n.label) {
+        ctx.fillStyle = '#FFF';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillText(n.label, sx + 8, sy + 4);
+      }
+    });
+    requestAnimationFrame(loop);
+  }
+  loop();
+</script>
+</body>
+</html>

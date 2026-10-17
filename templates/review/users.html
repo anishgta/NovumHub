@@ -1,0 +1,558 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management & Moderation - {{ config_data.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1140px; margin: 1.5rem auto 3rem auto;">
+  
+  <!-- Breadcrumb & Page Header -->
+  <div style="margin-bottom: 1.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+      <a href="{{ url_for('review.queue') }}" class="btn-paper btn-paper-sm" style="background: var(--paper-sheet-warm);">
+        &larr; Back to Triage Queue
+      </a>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <span class="paper-stamp stamp-accent">[ADMIN CONTROL PANEL]</span>
+        <span class="paper-stamp">[MODERATION ACTIVE]</span>
+      </div>
+    </div>
+    
+    <h1 style="margin: 0.25rem 0 0.5rem 0; font-size: 2.25rem; font-weight: 800; color: var(--paper-ink);">
+      User Roster & Account Moderation
+    </h1>
+    <p style="color: var(--paper-ink-muted); margin: 0; font-size: 0.95rem; max-width: 780px;">
+      Manage member privileges, issue official compliance notices or spam warnings to students, enforce account bans, or permanently remove bad-faith accounts.
+    </p>
+  </div>
+
+  <!-- Metric Counters Row -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
+    <div class="paper-card" style="padding: 1.1rem 1.25rem; background: var(--paper-sheet);">
+      <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--paper-ink-muted); text-transform: uppercase;">Total Registered</div>
+      <div style="font-size: 2rem; font-weight: 800; color: var(--paper-ink); margin-top: 0.2rem;">{{ total_users }}</div>
+      <div style="font-size: 0.75rem; color: var(--paper-ink-muted); margin-top: 0.25rem; font-family: var(--font-mono);">Students, Reviewers & Judges</div>
+    </div>
+    <div class="paper-card" style="padding: 1.1rem 1.25rem; background: #fffdf5; border-color: #d97706;">
+      <div style="font-family: var(--font-mono); font-size: 0.75rem; color: #92400e; text-transform: uppercase;">Students Warned</div>
+      <div style="font-size: 2rem; font-weight: 800; color: #b45309; margin-top: 0.2rem;">{{ warned_count }}</div>
+      <div style="font-size: 0.75rem; color: #92400e; margin-top: 0.25rem; font-family: var(--font-mono);">Active / Logged notices</div>
+    </div>
+    <div class="paper-card" style="padding: 1.1rem 1.25rem; background: #fef2f2; border-color: #dc2626;">
+      <div style="font-family: var(--font-mono); font-size: 0.75rem; color: #991b1b; text-transform: uppercase;">Suspended / Banned</div>
+      <div style="font-size: 2rem; font-weight: 800; color: #dc2626; margin-top: 0.2rem;">{{ banned_count }}</div>
+      <div style="font-size: 0.75rem; color: #991b1b; margin-top: 0.25rem; font-family: var(--font-mono);">Access currently revoked</div>
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls Card -->
+  <div class="paper-card" style="padding: 1.25rem; margin-bottom: 1.5rem; background: var(--paper-sheet-warm);">
+    <form method="GET" action="{{ url_for('review.manage_users') }}" style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 0; align-items: flex-end;">
+      
+      <!-- Text Search -->
+      <div style="flex: 1; min-width: 220px;">
+        <label for="search-input" style="display: block; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.3rem;">
+          Search User
+        </label>
+        <input 
+          type="text" 
+          id="search-input"
+          name="q" 
+          value="{{ search_q }}" 
+          placeholder="Search by name, email, registration number..."
+          style="width: 100%; padding: 0.45rem 0.65rem; border: 1.5px solid var(--paper-ink); background: #ffffff; font-family: var(--font-sans); font-size: 0.9rem; box-shadow: 2px 2px 0px var(--paper-ink); margin: 0;"
+        >
+      </div>
+
+      <!-- Role Filter -->
+      <div style="width: 160px;">
+        <label for="role-filter" style="display: block; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.3rem;">
+          Role Filter
+        </label>
+        <select 
+          id="role-filter" 
+          name="role" 
+          style="width: 100%; padding: 0.45rem 0.65rem; border: 1.5px solid var(--paper-ink); background: #ffffff; font-family: var(--font-mono); font-size: 0.85rem; box-shadow: 2px 2px 0px var(--paper-ink); margin: 0;"
+        >
+          <option value="">All Roles</option>
+          <option value="student" {% if role_filter == 'student' %}selected{% endif %}>Students</option>
+          <option value="staff" {% if role_filter == 'staff' %}selected{% endif %}>Staff / Faculty</option>
+          <option value="alumni" {% if role_filter == 'alumni' %}selected{% endif %}>Alumni</option>
+          <option value="reviewer" {% if role_filter == 'reviewer' %}selected{% endif %}>Reviewers</option>
+          <option value="judge" {% if role_filter == 'judge' %}selected{% endif %}>Judges</option>
+          <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Admins</option>
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div style="width: 160px;">
+        <label for="status-filter" style="display: block; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.3rem;">
+          Account Status
+        </label>
+        <select 
+          id="status-filter" 
+          name="status" 
+          style="width: 100%; padding: 0.45rem 0.65rem; border: 1.5px solid var(--paper-ink); background: #ffffff; font-family: var(--font-mono); font-size: 0.85rem; box-shadow: 2px 2px 0px var(--paper-ink); margin: 0;"
+        >
+          <option value="">All Statuses</option>
+          <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+          <option value="warned" {% if status_filter == 'warned' %}selected{% endif %}>Warned Students</option>
+          <option value="banned" {% if status_filter == 'banned' %}selected{% endif %}>Banned Only</option>
+        </select>
+      </div>
+
+      <!-- Buttons -->
+      <div style="display: flex; gap: 0.5rem;">
+        <button type="submit" class="btn-paper btn-paper-accent" style="padding: 0.45rem 1rem; font-size: 0.85rem;">
+          Apply Filters
+        </button>
+        {% if search_q or role_filter or status_filter %}
+          <a href="{{ url_for('review.manage_users') }}" class="btn-paper" style="background: var(--paper-sheet); padding: 0.45rem 0.85rem; font-size: 0.85rem;">
+            Reset
+          </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Users Table Card -->
+  <article class="paper-card" style="padding: 1.5rem; background: #ffffff;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--paper-border); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+      <h3 style="margin: 0; font-size: 1.3rem; font-weight: 800;">
+        Showing {{ users|length }} User{% if users|length != 1 %}s{% endif %}
+      </h3>
+      <span class="paper-stamp-mini">[CONFIDENTIAL ROSTER]</span>
+    </div>
+
+    {% if users %}
+      <div style="overflow-x: auto;">
+        <table role="grid" style="width: 100%; border-collapse: collapse; margin-bottom: 0;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--paper-ink); text-align: left; background: var(--paper-sheet-warm);">
+              <th style="padding: 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase;">ID</th>
+              <th style="padding: 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase;">User Dossier</th>
+              <th style="padding: 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase;">Dept / Year</th>
+              <th style="padding: 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase;">Role & Status</th>
+              <th style="padding: 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase;">Change Role</th>
+              <th style="padding: 0.75rem; font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; text-align: right;">Moderation Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+              <tr style="border-bottom: 1px solid var(--paper-crease); vertical-align: middle; {% if u.is_banned %}background: #fff5f5;{% endif %}">
+                <!-- ID -->
+                <td style="padding: 0.75rem; font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700;">
+                  #{{ u.id }}
+                </td>
+
+                <!-- Dossier / Identity -->
+                <td style="padding: 0.75rem;">
+                  <div style="font-weight: 700; font-size: 0.95rem; color: var(--paper-ink); display: flex; align-items: center; gap: 0.4rem;">
+                    {{ u.name }}
+                    {% if u.id == current_user.id %}
+                      <span class="paper-stamp-mini" style="background: var(--paper-sheet-warm); color: var(--paper-ink); font-size: 0.65rem;">(YOU)</span>
+                    {% endif %}
+                  </div>
+                  <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--paper-ink-muted); margin-top: 0.15rem;">
+                    {{ u.email }}
+                  </div>
+                  {% if u.display_registration_no %}
+                    <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--brand-maroon); margin-top: 0.15rem;">
+                      Reg No: {{ u.display_registration_no }}
+                    </div>
+                  {% endif %}
+                </td>
+
+                <!-- Academic Info -->
+                <td style="padding: 0.75rem; font-size: 0.85rem; color: var(--paper-ink-body);">
+                  <div>{{ u.department or 'General' }}</div>
+                  <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--paper-ink-muted);">
+                    {{ u.year or 'N/A' }}
+                  </div>
+                </td>
+
+                <!-- Status & Warnings -->
+                <td style="padding: 0.75rem;">
+                  <div style="display: flex; flex-direction: column; gap: 0.35rem; align-items: flex-start;">
+                    <!-- Role Pill -->
+                    <span class="paper-stamp-mini" style="text-transform: uppercase; font-weight: 800; font-size: 0.7rem;
+                      {% if u.role == 'admin' %}background: #881337; color: #fff;
+                      {% elif u.role == 'reviewer' %}background: #6d28d9; color: #fff;
+                      {% elif u.role == 'judge' %}background: #1d4ed8; color: #fff;
+                      {% elif u.role == 'staff' %}background: #065f46; color: #fff;
+                      {% elif u.role == 'alumni' %}background: #92400e; color: #fff;
+                      {% else %}background: var(--paper-sheet-warm); color: var(--paper-ink);{% endif %}">
+                      {{ u.role }}
+                    </span>
+
+                    <!-- Account State (Active vs Banned) -->
+                    {% if u.is_banned %}
+                      <span class="paper-stamp-mini" style="background: #dc2626; color: #fff; font-size: 0.68rem; border-color: #000;" title="Ban Reason: {{ u.ban_reason }}">
+                        ⛔ BANNED
+                      </span>
+                    {% else %}
+                      <span class="paper-stamp-mini" style="background: #ecfdf5; color: #047857; font-size: 0.68rem; border-color: #047857;">
+                        &check; ACTIVE
+                      </span>
+                    {% endif %}
+
+                    <!-- Warning Count Tag -->
+                    {% if u.warning_count > 0 %}
+                      <button 
+                        type="button" 
+                        class="paper-stamp-mini" 
+                        onclick="toggleWarningHistory('warn-hist-{{ u.id }}')"
+                        style="background: #fef3c7; color: #92400e; border-color: #d97706; font-size: 0.68rem; cursor: pointer; text-decoration: underline;"
+                        title="Click to toggle warning notices"
+                      >
+                        ⚠️ {{ u.warning_count }} Notice{% if u.warning_count > 1 %}s{% endif %}
+                      </button>
+                    {% endif %}
+                  </div>
+
+                  {% if u.is_banned and u.ban_reason %}
+                    <div style="font-size: 0.72rem; color: #dc2626; font-family: var(--font-mono); margin-top: 0.35rem; max-width: 180px; line-height: 1.2;">
+                      Reason: {{ u.ban_reason }}
+                    </div>
+                  {% endif %}
+                </td>
+
+                <!-- Change Role Form -->
+                <td style="padding: 0.75rem;">
+                  <form method="POST" action="{{ url_for('review.change_role', user_id=u.id) }}" style="display: flex; gap: 0.35rem; margin: 0; align-items: center;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <select name="role" style="font-family: var(--font-mono); font-size: 0.75rem; padding: 0.25rem 0.4rem; margin: 0; width: auto; border: 1.5px solid var(--paper-ink);">
+                      <option value="student" {% if u.role == 'student' %}selected{% endif %}>Student</option>
+                      <option value="staff" {% if u.role == 'staff' %}selected{% endif %}>Staff / Faculty</option>
+                      <option value="alumni" {% if u.role == 'alumni' %}selected{% endif %}>Alumni</option>
+                      <option value="reviewer" {% if u.role == 'reviewer' %}selected{% endif %}>Reviewer</option>
+                      <option value="judge" {% if u.role == 'judge' %}selected{% endif %}>Judge</option>
+                      <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>Admin</option>
+                    </select>
+                    <button type="submit" class="btn-paper btn-paper-sm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: var(--paper-sheet);">
+                      Set
+                    </button>
+                  </form>
+                </td>
+
+                <!-- Moderation Actions -->
+                <td style="padding: 0.75rem; text-align: right;">
+                  <div style="display: inline-flex; gap: 0.4rem; align-items: center; justify-content: flex-end;">
+                    
+                    <!-- 1. Warn Student Button -->
+                    {% if u.id != current_user.id %}
+                      <button 
+                        type="button" 
+                        class="btn-paper btn-paper-sm" 
+                        style="background: #fffbeb; color: #92400e; border-color: #b45309; font-size: 0.75rem; padding: 0.25rem 0.55rem;"
+                        onclick="openWarnModal('{{ u.id }}', '{{ u.name|e }}', '{{ u.email|e }}')"
+                        title="Issue official compliance warning / spam notice"
+                      >
+                        ⚠️ Warn
+                      </button>
+                    {% endif %}
+
+                    <!-- 2. Ban / Unban Button -->
+                    {% if u.id != current_user.id %}
+                      {% if u.is_banned %}
+                        <form method="POST" action="{{ url_for('review.ban_user', user_id=u.id) }}" style="margin: 0; display: inline;">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                          <input type="hidden" name="action" value="unban">
+                          <button 
+                            type="submit" 
+                            class="btn-paper btn-paper-sm" 
+                            style="background: #ecfdf5; color: #047857; border-color: #047857; font-size: 0.75rem; padding: 0.25rem 0.55rem;"
+                            onclick="return confirm('Reinstate account for {{ u.name }}?');"
+                          >
+                            &check; Unban
+                          </button>
+                        </form>
+                      {% else %}
+                        <button 
+                          type="button" 
+                          class="btn-paper btn-paper-sm" 
+                          style="background: #fef2f2; color: #b91c1c; border-color: #b91c1c; font-size: 0.75rem; padding: 0.25rem 0.55rem;"
+                          onclick="openBanModal('{{ u.id }}', '{{ u.name|e }}', '{{ u.email|e }}')"
+                          title="Revoke access and ban user"
+                        >
+                          ⛔ Ban
+                        </button>
+                      {% endif %}
+                    {% endif %}
+
+                    <!-- 3. Remove / Delete Account Button -->
+                    {% if u.id != current_user.id %}
+                      <button 
+                        type="button" 
+                        class="btn-paper btn-paper-sm" 
+                        style="background: #181716; color: #ffffff; border-color: #000000; font-size: 0.75rem; padding: 0.25rem 0.55rem;"
+                        onclick="openDeleteModal('{{ u.id }}', '{{ u.name|e }}', '{{ u.email|e }}')"
+                        title="Permanently remove account"
+                      >
+                        &times; Remove
+                      </button>
+                    {% endif %}
+
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Warning History Drawer (Initially hidden) -->
+              {% if u.warnings %}
+                <tr id="warn-hist-{{ u.id }}" style="display: none; background: #fffdf5; border-bottom: 2px dashed #d97706;">
+                  <td colspan="6" style="padding: 1rem 1.5rem;">
+                    <div style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: #92400e; margin-bottom: 0.6rem; text-transform: uppercase;">
+                      Administrative Notices & Warning History for {{ u.name }} ({{ u.warnings|length }} total)
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                      {% for w in u.warnings %}
+                        <div style="background: #ffffff; border: 1.5px solid #d97706; padding: 0.75rem 1rem; box-shadow: 2px 2px 0px #b45309;">
+                          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
+                            <span class="paper-stamp-mini" style="background: #fef3c7; color: #92400e; border-color: #d97706; font-size: 0.7rem;">
+                              Category: {{ w.category }}
+                            </span>
+                            <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--paper-ink-muted);">
+                              Issued {{ w.created_at.strftime('%d %b %Y, %H:%M') }} 
+                              {% if w.admin %}&bull; By {{ w.admin.name }}{% endif %}
+                              &bull; Status: {% if w.is_acknowledged %}<strong style="color: #047857;">Acknowledged</strong>{% else %}<strong style="color: #dc2626;">Pending Acknowledgment</strong>{% endif %}
+                            </span>
+                          </div>
+                          <div style="font-size: 0.85rem; color: #2d2b28; line-height: 1.45; white-space: pre-line;">
+                            {{ w.message }}
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </td>
+                </tr>
+              {% endif %}
+
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div style="padding: 3rem 1rem; text-align: center; color: var(--paper-ink-muted);">
+        <p style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem;">No matching accounts found.</p>
+        <p style="font-size: 0.9rem; margin-bottom: 1rem;">Try clearing your search terms or filters.</p>
+        <a href="{{ url_for('review.manage_users') }}" class="btn-paper">Reset Search</a>
+      </div>
+    {% endif %}
+  </article>
+
+</div>
+
+<!-- =========================================================================
+     MODAL 1: WARN STUDENT / ISSUE OFFICIAL COMPLIANCE NOTICE
+     ========================================================================= -->
+<div id="warn-modal" class="paper-modal-overlay" onclick="handleBackdropClick(event, 'warn-modal')">
+  <div class="paper-modal-box">
+    <div class="paper-modal-header">
+      <div>
+        <div class="paper-stamp stamp-accent" style="font-size: 0.68rem; margin-bottom: 0.25rem;">[OFFICIAL NOTICE DISPATCH]</div>
+        <h3 style="margin: 0; font-size: 1.4rem; font-weight: 800; color: #92400e;">
+          Issue Warning Notice
+        </h3>
+      </div>
+      <button type="button" class="paper-modal-close-btn" onclick="closeModal('warn-modal')">&times;</button>
+    </div>
+
+    <form id="warn-form" method="POST" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      
+      <p style="font-size: 0.9rem; color: var(--paper-ink-body); margin-bottom: 1rem;">
+        Delivering an official warning to: <strong id="warn-user-name"></strong> (<span id="warn-user-email" style="font-family: var(--font-mono); font-size: 0.82rem;"></span>). 
+        This notice will be pinned to their dashboard until acknowledged.
+      </p>
+
+      <!-- Category selection -->
+      <div style="margin-bottom: 1rem;">
+        <label for="warn-category" style="display: block; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.35rem;">
+          Notice / Violation Category
+        </label>
+        <select 
+          id="warn-category" 
+          name="category" 
+          required 
+          style="width: 100%; padding: 0.5rem 0.65rem; border: 1.5px solid var(--paper-ink); background: #ffffff; font-family: var(--font-mono); font-size: 0.85rem; box-shadow: 2px 2px 0px var(--paper-ink);"
+        >
+          <option value="Spam / Low Quality Submissions">Spam / Low Quality Submissions</option>
+          <option value="Repeated Duplicate Submissions">Repeated / Duplicate Submissions</option>
+          <option value="Inappropriate / Offensive Language">Inappropriate / Offensive Language</option>
+          <option value="Academic Dishonesty / Plagiarism">Academic Dishonesty / Plagiarism</option>
+          <option value="Community Guidelines Violation">Community Guidelines Violation</option>
+          <option value="Custom Administrative Notice">Custom Administrative Notice</option>
+        </select>
+      </div>
+
+      <!-- Notice message textarea -->
+      <div style="margin-bottom: 1.25rem;">
+        <label for="warn-message" style="display: block; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.35rem;">
+          Official Notice Details & Guidance
+        </label>
+        <textarea 
+          id="warn-message" 
+          name="message" 
+          rows="4" 
+          required 
+          placeholder="Specify the problematic submission/comment, outline what policy was breached, and instruct the student on required changes..."
+          style="width: 100%; padding: 0.6rem; border: 1.5px solid var(--paper-ink); background: #ffffff; font-family: var(--font-sans); font-size: 0.9rem; box-shadow: 2px 2px 0px var(--paper-ink); line-height: 1.45;"
+        ></textarea>
+      </div>
+
+      <!-- Action buttons -->
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1.5px dashed var(--paper-border); padding-top: 1rem;">
+        <button type="button" class="btn-paper" style="background: var(--paper-sheet-warm);" onclick="closeModal('warn-modal')">
+          Cancel
+        </button>
+        <button type="submit" class="btn-paper" style="background: #f59e0b; color: #181716; border-color: #000; font-weight: 800;">
+          Dispatch Official Notice &rarr;
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- =========================================================================
+     MODAL 2: BAN ACCOUNT / REVOKE ACCESS
+     ========================================================================= -->
+<div id="ban-modal" class="paper-modal-overlay" onclick="handleBackdropClick(event, 'ban-modal')">
+  <div class="paper-modal-box">
+    <div class="paper-modal-header">
+      <div>
+        <div class="paper-stamp" style="background: #dc2626; color: #fff; font-size: 0.68rem; margin-bottom: 0.25rem;">[SUSPENSION ORDER]</div>
+        <h3 style="margin: 0; font-size: 1.4rem; font-weight: 800; color: #dc2626;">
+          Suspend / Ban Account
+        </h3>
+      </div>
+      <button type="button" class="paper-modal-close-btn" onclick="closeModal('ban-modal')">&times;</button>
+    </div>
+
+    <form id="ban-form" method="POST" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="action" value="ban">
+
+      <p style="font-size: 0.9rem; color: var(--paper-ink-body); margin-bottom: 1rem;">
+        You are about to revoke system access for: <strong id="ban-user-name"></strong> (<span id="ban-user-email" style="font-family: var(--font-mono); font-size: 0.82rem;"></span>). 
+        The student will be immediately logged out and blocked from signing in.
+      </p>
+
+      <div style="margin-bottom: 1.25rem;">
+        <label for="ban-reason" style="display: block; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.35rem;">
+          Official Ban Reason / Suspension Notice
+        </label>
+        <textarea 
+          id="ban-reason" 
+          name="ban_reason" 
+          rows="3" 
+          required 
+          placeholder="State the rationale for suspending this account (this explanation will be displayed to the user if they attempt to sign in)..."
+          style="width: 100%; padding: 0.6rem; border: 1.5px solid var(--paper-ink); background: #ffffff; font-family: var(--font-sans); font-size: 0.9rem; box-shadow: 2px 2px 0px var(--paper-ink);"
+        ></textarea>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1.5px dashed var(--paper-border); padding-top: 1rem;">
+        <button type="button" class="btn-paper" style="background: var(--paper-sheet-warm);" onclick="closeModal('ban-modal')">
+          Cancel
+        </button>
+        <button type="submit" class="btn-paper" style="background: #dc2626; color: #ffffff; border-color: #000; font-weight: 800;">
+          Execute Account Ban &rarr;
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- =========================================================================
+     MODAL 3: REMOVE ACCOUNT PERMANENTLY
+     ========================================================================= -->
+<div id="delete-modal" class="paper-modal-overlay" onclick="handleBackdropClick(event, 'delete-modal')">
+  <div class="paper-modal-box">
+    <div class="paper-modal-header">
+      <div>
+        <div class="paper-stamp" style="background: #000000; color: #fff; font-size: 0.68rem; margin-bottom: 0.25rem;">[PERMANENT REMOVAL]</div>
+        <h3 style="margin: 0; font-size: 1.4rem; font-weight: 800; color: var(--paper-ink);">
+          Confirm Account Deletion
+        </h3>
+      </div>
+      <button type="button" class="paper-modal-close-btn" onclick="closeModal('delete-modal')">&times;</button>
+    </div>
+
+    <form id="delete-form" method="POST" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div style="background: #fef2f2; border: 1.5px solid #dc2626; padding: 1rem; margin-bottom: 1.25rem; font-size: 0.9rem; line-height: 1.5;">
+        <strong style="color: #b91c1c;">Caution: Irreversible Action</strong><br>
+        Are you sure you want to permanently delete the account for <strong id="delete-user-name"></strong> (<span id="delete-user-email" style="font-family: var(--font-mono);"></span>)?<br>
+        All authored submissions, comments, showcase projects, and records associated with this account will be permanently expunged.
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1.5px dashed var(--paper-border); padding-top: 1rem;">
+        <button type="button" class="btn-paper" style="background: var(--paper-sheet-warm);" onclick="closeModal('delete-modal')">
+          Cancel
+        </button>
+        <button type="submit" class="btn-paper" style="background: #181716; color: #ffffff; border-color: #000; font-weight: 800;">
+          Delete Account Permanently &times;
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function openWarnModal(userId, userName, userEmail) {
+    document.getElementById('warn-form').action = '/admin/users/' + userId + '/warn';
+    document.getElementById('warn-user-name').textContent = userName;
+    document.getElementById('warn-user-email').textContent = userEmail;
+    document.getElementById('warn-message').value = '';
+    document.getElementById('warn-modal').classList.add('active');
+  }
+
+  function openBanModal(userId, userName, userEmail) {
+    document.getElementById('ban-form').action = '/admin/users/' + userId + '/ban';
+    document.getElementById('ban-user-name').textContent = userName;
+    document.getElementById('ban-user-email').textContent = userEmail;
+    document.getElementById('ban-reason').value = '';
+    document.getElementById('ban-modal').classList.add('active');
+  }
+
+  function openDeleteModal(userId, userName, userEmail) {
+    document.getElementById('delete-form').action = '/admin/users/' + userId + '/delete';
+    document.getElementById('delete-user-name').textContent = userName;
+    document.getElementById('delete-user-email').textContent = userEmail;
+    document.getElementById('delete-modal').classList.add('active');
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+  }
+
+  function handleBackdropClick(event, modalId) {
+    if (event.target === document.getElementById(modalId)) {
+      closeModal(modalId);
+    }
+  }
+
+  function toggleWarningHistory(rowId) {
+    var row = document.getElementById(rowId);
+    if (!row) return;
+    if (row.style.display === 'none' || row.style.display === '') {
+      row.style.display = 'table-row';
+    } else {
+      row.style.display = 'none';
+    }
+  }
+
+  // Close modals on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      ['warn-modal', 'ban-modal', 'delete-modal'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+      });
+    }
+  });
+</script>
+{% endblock %}

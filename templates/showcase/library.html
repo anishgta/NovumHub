@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Reference Library - {{ config_data.SHOWCASE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="showcase-hero-banner" style="margin-bottom: 2rem;">
+  <div class="hero-pill-badge" style="margin-bottom: 0.8rem;">
+    <span class="pulsing-dot"></span>
+    <span>Knowledge Base for Future Teams</span>
+  </div>
+  <h1>Reference Library</h1>
+  <p>
+    A curated collection of past hackathon builds selected for outstanding architecture, 
+    thorough developer notes, and reusable engineering blueprints.
+  </p>
+</div>
+
+<!-- Popular Tech Stack Tags -->
+{% if popular_tags %}
+  <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem;">
+    <div style="font-weight: 700; font-size: 0.9rem; color: var(--midnight-navy); margin-bottom: 0.6rem;">
+      Filter by Technical Domain:
+    </div>
+    <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+      <a href="{{ url_for('showcase.library') }}" class="filter-chip {% if not current_tag %}active{% endif %}">
+        All Blueprints
+      </a>
+      {% for t_name, t_cnt in popular_tags %}
+        <a href="{{ url_for('showcase.library', tag=t_name) }}" class="filter-chip {% if current_tag == t_name %}active{% endif %}">
+          {{ t_name }} ({{ t_cnt }})
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+<!-- Reference Projects List -->
+{% if projects %}
+  <div style="display: flex; flex-direction: column; gap: 2rem; margin-bottom: 3rem;">
+    {% for p in projects %}
+      <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+          <div>
+            <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.4rem; flex-wrap: wrap;">
+              <span class="category-pill-tag tag-idea">{{ p.event.name }}</span>
+              <span class="category-pill-tag tag-research">{{ p.track }}</span>
+              <span class="project-tag">{{ p.demo_mode_label }}</span>
+            </div>
+            <h3 style="font-size: 1.45rem; font-weight: 800; color: var(--midnight-navy); margin: 0 0 0.35rem 0;">
+              <a href="{{ url_for('showcase.detail', project_id=p.id) }}" style="color: inherit; text-decoration: none;">
+                {{ p.title }}
+              </a>
+            </h3>
+            <p style="color: #475569; font-size: 0.95rem; margin: 0;">{{ p.pitch }}</p>
+          </div>
+
+          <div style="display: flex; gap: 0.6rem;">
+            {% if p.repo_url %}
+              <a href="{{ p.repo_url }}" target="_blank" rel="noopener noreferrer" class="btn-editorial-outline" style="font-size: 0.82rem; padding: 0.4rem 0.9rem;">
+                Code Repo &rarr;
+              </a>
+            {% endif %}
+            <a href="{{ url_for('showcase.detail', project_id=p.id) }}" class="btn-editorial-primary" style="font-size: 0.82rem; padding: 0.4rem 0.9rem;">
+              Full Demo & Notes &rarr;
+            </a>
+          </div>
+        </div>
+
+        <div class="project-tags-row" style="margin-bottom: 1.25rem;">
+          {% for tag in p.tech_tags_list %}
+            <span class="project-tag">{{ tag }}</span>
+          {% endfor %}
+        </div>
+
+        <!-- Dev Note Snippets -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; background: #F8FAFC; padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid #E2E8F0;">
+          {% set note_prob = p.get_note('problem') %}
+          {% if note_prob %}
+            <div>
+              <strong style="color: var(--midnight-navy); font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">
+                Problem Tackled:
+              </strong>
+              <div style="font-size: 0.85rem; color: #334155; line-height: 1.5;">
+                {{ note_prob.body_markdown[:160] }}{% if note_prob.body_markdown|length > 160 %}...{% endif %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% set note_arch = p.get_note('how_it_works') %}
+          {% if note_arch %}
+            <div>
+              <strong style="color: var(--midnight-navy); font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">
+                Architecture / How It Works:
+              </strong>
+              <div style="font-size: 0.85rem; color: #334155; line-height: 1.5;">
+                {{ note_arch.body_markdown[:160] }}{% if note_arch.body_markdown|length > 160 %}...{% endif %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% set note_diff = p.get_note('differently') %}
+          {% if note_diff %}
+            <div>
+              <strong style="color: var(--midnight-navy); font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">
+                Lessons Learned / What to do differently:
+              </strong>
+              <div style="font-size: 0.85rem; color: #334155; line-height: 1.5;">
+                {{ note_diff.body_markdown[:160] }}{% if note_diff.body_markdown|length > 160 %}...{% endif %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-showcase-card">
+    <h4>No reference projects matched</h4>
+    <p style="color: var(--muted-text);">
+      Try selecting another tech domain or view all reference projects.
+    </p>
+    <a href="{{ url_for('showcase.library') }}" class="btn-editorial-primary">
+      Reset Filters
+    </a>
+  </div>
+{% endif %}
+
+{% endblock %}

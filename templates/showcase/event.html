@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ event.name }} - {{ config_data.SHOWCASE_NAME }}{% endblock %}
+
+{% block content %}
+<!-- Event Hero Banner -->
+<div class="showcase-hero-banner" style="margin-bottom: 2rem;">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
+    <div>
+      <div class="hero-pill-badge" style="margin-bottom: 0.8rem;">
+        <span class="pulsing-dot"></span>
+        <span>Hackathon Event &bull; {{ event.year }}</span>
+      </div>
+      <h1>{{ event.name }}</h1>
+      {% if event.theme %}
+        <p style="font-size: 1.15rem; color: #DDD6FE; font-weight: 600; margin-bottom: 0.5rem;">
+          "{{ event.theme }}"
+        </p>
+      {% endif %}
+      <p style="color: #C7D2FE; font-size: 0.95rem; max-width: 650px;">
+        {{ event.description or 'Official AIT campus hackathon project arena.' }}
+      </p>
+      {% if event.organiser %}
+        <div style="font-size: 0.85rem; color: #94A3B8;">
+          Organised by: <strong>{{ event.organiser }}</strong>
+        </div>
+      {% endif %}
+    </div>
+
+    <div>
+      {% if event.is_active %}
+        <a href="{{ url_for('showcase.create_project') }}" class="btn-gradient-pill">
+          + Submit Project for {{ event.year }}
+        </a>
+      {% else %}
+        <span style="background: rgba(255, 255, 255, 0.1); color: #C7D2FE; padding: 0.4rem 0.9rem; border-radius: var(--radius-full); font-size: 0.85rem; font-weight: 600;">
+          Event Concluded
+        </span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Track Chips -->
+{% if tracks %}
+  <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
+    <span style="font-weight: 700; font-size: 0.85rem; color: var(--midnight-navy);">Tracks:</span>
+    <a href="{{ url_for('showcase.event_detail', event_id=event.id) }}" class="filter-chip {% if not current_track %}active{% endif %}">
+      All Tracks
+    </a>
+    {% for tr in tracks %}
+      <a href="{{ url_for('showcase.event_detail', event_id=event.id, track=tr) }}" class="filter-chip {% if current_track == tr %}active{% endif %}">
+        {{ tr }}
+      </a>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- Leaderboard Section (Conditional on results_published or Judge/Admin role) -->
+{% if can_view_leaderboard and leaderboard %}
+  <div style="background: #FFFFFF; border: 1.5px solid var(--violet); border-radius: var(--radius-md); padding: 1.75rem; margin-bottom: 2.5rem; box-shadow: 0 10px 25px rgba(139, 92, 246, 0.12);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+      <div>
+        <h3 style="font-size: 1.4rem; font-weight: 800; color: var(--midnight-navy); margin: 0;">
+          &#127942; Official Leaderboard & Standings
+        </h3>
+        <p style="color: var(--muted-text); font-size: 0.88rem; margin: 0.2rem 0 0 0;">
+          Ranked by average rubric evaluation score across all judging panels.
+        </p>
+      </div>
+      {% if not event.results_published %}
+        <span style="background: #FEF3C7; color: #92400E; font-size: 0.78rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: var(--radius-full);">
+          Preview (Judges / Admin Only)
+        </span>
+      {% endif %}
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="border-bottom: 2px solid #E2E8F0; text-align: left; font-size: 0.85rem; color: #64748B;">
+          <th style="padding: 0.6rem; width: 60px;">Rank</th>
+          <th style="padding: 0.6rem;">Project</th>
+          <th style="padding: 0.6rem;">Team</th>
+          <th style="padding: 0.6rem;">Track</th>
+          <th style="padding: 0.6rem; text-align: center;">Average Score</th>
+          <th style="padding: 0.6rem; text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in leaderboard %}
+          {% set p = item.project %}
+          <tr style="border-bottom: 1px solid #E2E8F0; font-size: 0.92rem;">
+            <td style="padding: 0.85rem 0.6rem; font-weight: 800; font-family: var(--font-mono);">
+              {% if loop.index == 1 %}
+                <span style="font-size: 1.25rem;">&#129351;</span> 1st
+              {% elif loop.index == 2 %}
+                <span style="font-size: 1.25rem;">&#129352;</span> 2nd
+              {% elif loop.index == 3 %}
+                <span style="font-size: 1.25rem;">&#129353;</span> 3rd
+              {% else %}
+                #{{ loop.index }}
+              {% endif %}
+            </td>
+            <td style="padding: 0.85rem 0.6rem;">
+              <strong><a href="{{ url_for('showcase.detail', project_id=p.id) }}" style="color: var(--midnight-navy);">{{ p.title }}</a></strong>
+            </td>
+            <td style="padding: 0.85rem 0.6rem; color: #475569;">{{ p.team_name }}</td>
+            <td style="padding: 0.85rem 0.6rem; color: #64748B;">{{ p.track }}</td>
+            <td style="padding: 0.85rem 0.6rem; text-align: center;">
+              <span style="font-family: var(--font-mono); font-weight: 800; color: var(--violet); background: #F5F3FF; padding: 0.25rem 0.65rem; border-radius: var(--radius-full);">
+                {{ item.avg_score }} / 60
+              </span>
+              <span style="font-size: 0.75rem; color: #94A3B8; display: block; margin-top: 0.2rem;">
+                ({{ item.total_evaluations }} evaluations)
+              </span>
+            </td>
+            <td style="padding: 0.85rem 0.6rem; text-align: right;">
+              <a href="{{ url_for('showcase.detail', project_id=p.id) }}" class="btn-editorial-outline" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">
+                View Demo &rarr;
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% elif not event.results_published %}
+  <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; margin-bottom: 2.5rem;">
+    <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--midnight-navy); margin-bottom: 0.3rem;">
+      &#9203; Judging in Progress
+    </h4>
+    <p style="color: var(--muted-text); font-size: 0.9rem; margin: 0;">
+      Evaluations are being conducted by faculty and industry judges. Official scores and awards will be published upon conclusion.
+    </p>
+  </div>
+{% endif %}
+
+<!-- Participant Projects Grid -->
+<h3 style="font-size: 1.35rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 1.25rem;">
+  Participating Projects ({{ projects|length }})
+</h3>
+
+{% if projects %}
+  <div class="showcase-grid">
+    {% for p in projects %}
+      <div class="project-card">
+        <div class="project-thumbnail">
+          {% set cover = p.get_asset('screenshot') %}
+          {% if cover %}
+            <img src="{{ url_for('showcase.download_asset', asset_id=cover.id) }}" alt="{{ p.title }}">
+          {% else %}
+            <div style="color: #A5B4FC; font-weight: 700; text-align: center; padding: 1rem;">
+              {{ p.demo_mode_label }}
+            </div>
+          {% endif %}
+          <span class="project-thumb-badge">{{ p.demo_mode_label }}</span>
+        </div>
+        <div class="project-card-body">
+          <div style="font-size: 0.78rem; font-weight: 700; color: var(--electric-blue); text-transform: uppercase; margin-bottom: 0.3rem;">
+            {{ p.track }}
+          </div>
+          <h4 class="project-card-title">
+            <a href="{{ url_for('showcase.detail', project_id=p.id) }}">{{ p.title }}</a>
+          </h4>
+          <p class="project-pitch">{{ p.pitch }}</p>
+          <div class="project-card-footer">
+            <span>By <strong>{{ p.team_name }}</strong></span>
+            <span style="font-family: var(--font-mono); font-weight: 700; color: var(--midnight-navy);">&#9650; {{ p.upvote_count }}</span>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-showcase-card">
+    <p>No published projects found for this event track.</p>
+  </div>
+{% endif %}
+
+{% endblock %}

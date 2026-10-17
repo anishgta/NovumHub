@@ -1,0 +1,147 @@
+<!--
+  templates/partials/navbar.html
+  ==============================================================================
+  NOVUMHUB BOXY PAPER NAVIGATION BAR
+  - Strict baseline alignment across all navigation points and user actions
+  - Normalized 34px button heights for pixel-perfect vertical consistency
+  - Role-aware badges (Judging, Triage Queue, Dashboard notifications)
+  - Accessible mobile drawer navigation
+  ==============================================================================
+-->
+<header class="editorial-header" id="site-header">
+  <div class="nav-wrapper">
+    <div class="nav-bar">
+      <!-- Left: Brand Identity & Telemetry Tag -->
+      <div class="nav-brand-group">
+        <a href="{{ url_for('main.home') }}" class="brand-link" aria-label="{{ config_data.SITE_NAME }} Home">
+          <!-- SVG Logo Placeholder left to main title -->
+          <span class="brand-logo-svg" id="brand-logo-placeholder" title="{{ config_data.SITE_NAME }} Logo">
+            <svg id="novumhub-logo-svg" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" class="nav-logo-icon">
+              <rect x="2" y="2" width="24" height="24" rx="4" fill="var(--paper-ink, #0f172a)" stroke="var(--paper-ink, #0f172a)" stroke-width="1.5"/>
+              <path d="M7 21V7L14 16L21 7V21" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="14" cy="5.5" r="1.5" fill="#e65c00"/>
+            </svg>
+          </span>
+          <span class="brand-title">{{ config_data.SITE_NAME }}</span>
+          <span class="brand-meta-tag">[AIT PUNE]</span>
+        </a>
+        <div class="nav-status-indicator" title="Autonomous Campus Ledger Online">
+          <span class="status-pulse-dot"></span>
+          <span class="status-text">SYS.ACTIVE</span>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation Hamburger Toggle -->
+      <button class="nav-mobile-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+      </button>
+
+      <!-- Center & Right: Navigation Menu & Actions -->
+      <nav class="nav-menu" id="nav-menu" aria-label="Main Navigation">
+        <!-- Main Navigation Links (Clean & Streamlined) -->
+        <ul class="nav-links">
+          <li>
+            <a href="{{ url_for('submissions.browse') }}" class="nav-link-item">
+              <span class="nav-num">01</span>
+              <span class="nav-label">Archive</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('showcase.home') }}" class="nav-link-item">
+              <span class="nav-num">02</span>
+              <span class="nav-label">Showcase</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.home') }}#channels" class="nav-link-item">
+              <span class="nav-num">03</span>
+              <span class="nav-label">Channels</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.stats') }}" class="nav-link-item">
+              <span class="nav-num">04</span>
+              <span class="nav-label">Stats</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.about') }}" class="nav-link-item">
+              <span class="nav-num">05</span>
+              <span class="nav-label">About</span>
+            </a>
+          </li>
+        </ul>
+
+        <!-- Action Items (Strictly Unified 34px Height & Boxy Baseline Alignment) -->
+        <div class="nav-actions">
+          {% if current_user.is_authenticated %}
+            <!-- Judge / Admin quick evaluation workspace link -->
+            {% if current_user.is_judge or current_user.is_admin %}
+              <a href="{{ url_for('showcase.judge_dashboard') }}" class="nav-action-tag tag-judge" title="Judge Evaluation Workspace">
+                &#9733; Judging
+              </a>
+            {% endif %}
+
+            <!-- Reviewer / Admin triage link -->
+            {% if current_user.is_reviewer %}
+              <a href="{{ url_for('review.queue') }}" class="nav-action-tag tag-triage" title="Reviewer Triage Queue">
+                Triage Queue
+              </a>
+            {% endif %}
+
+            <!-- Student Dashboard with Notification Badge -->
+            <a href="{{ url_for('submissions.dashboard') }}" class="nav-action-link" title="Student Dashboard">
+              <span>Dashboard</span>
+              {% if unread_notif_count and unread_notif_count > 0 %}
+                <span class="notif-badge-pill">{{ unread_notif_count }}</span>
+              {% endif %}
+            </a>
+
+            <!-- Submit Button (Solid Ink Pill) -->
+            <a href="{{ url_for('submissions.submit') }}" class="nav-btn-solid">
+              <span>+ Submit</span>
+            </a>
+
+            <!-- User Menu Dropdown -->
+            <details class="dropdown user-dropdown">
+              <summary class="user-summary-btn" aria-haspopup="true">
+                <span class="user-avatar-initial">{{ current_user.name[0] }}</span>
+                <span class="user-name-short">{{ current_user.name.split()[0] }}</span>
+                <span class="dropdown-caret">&darr;</span>
+              </summary>
+              <ul class="dropdown-menu-card">
+                <li class="dropdown-meta-header">
+                  <div class="user-full-name">{{ current_user.name }}</div>
+                  <div class="user-email-meta">{{ current_user.email }}</div>
+                </li>
+                <li class="dropdown-divider-line"></li>
+                <li><a href="{{ url_for('submissions.dashboard') }}">My Submissions</a></li>
+                <li><a href="{{ url_for('showcase.create_project') }}">+ Submit Demo Project</a></li>
+                {% if current_user.is_judge or current_user.is_admin %}
+                  <li><a href="{{ url_for('showcase.judge_dashboard') }}">&#9733; Judge Workspace</a></li>
+                {% endif %}
+                {% if current_user.is_admin %}
+                  <li><a href="{{ url_for('showcase.admin_events') }}">&#9881; Hackathon Events</a></li>
+                {% endif %}
+                {% if current_user.is_reviewer %}
+                  <li><a href="{{ url_for('review.queue') }}">Triage Dashboard</a></li>
+                {% endif %}
+                <li class="dropdown-divider-line"></li>
+                <li><a href="{{ url_for('auth.profile') }}">&#9881; Account Settings</a></li>
+                <li><a href="{{ url_for('auth.logout') }}" class="dropdown-logout-link">Log Out &rarr;</a></li>
+              </ul>
+            </details>
+
+          {% else %}
+            <!-- Visitor Links -->
+            <a href="{{ url_for('auth.login') }}" class="nav-action-link">Log In</a>
+            <a href="{{ url_for('submissions.submit') }}" class="nav-btn-solid">
+              <span>+ Submit</span>
+            </a>
+          {% endif %}
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>

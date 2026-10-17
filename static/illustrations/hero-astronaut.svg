@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 540" fill="none">
+  <defs>
+    <!-- Celestial Star Glow -->
+    <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="25%" stop-color="#80A8FF" stop-opacity="0.8"/>
+      <stop offset="60%" stop-color="#4D7CFF" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- Helmet Visor Gradient -->
+    <linearGradient id="visorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD670"/>
+      <stop offset="40%" stop-color="#F472B6"/>
+      <stop offset="75%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#4D7CFF"/>
+    </linearGradient>
+
+    <!-- Suit Gradient -->
+    <linearGradient id="suitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#E2E8F0"/>
+      <stop offset="100%" stop-color="#CBD5E1"/>
+    </linearGradient>
+
+    <!-- Shadow Gradient -->
+    <linearGradient id="suitShadow" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#1E1B4B" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#1E1B4B" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Nebula Back Glow -->
+    <radialGradient id="nebulaGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.35"/>
+      <stop offset="70%" stop-color="#4D7CFF" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#090B2A" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Ambient Nebula Aura behind astronaut -->
+  <circle cx="270" cy="270" r="230" fill="url(#nebulaGlow)"/>
+
+  <!-- Celestial Shining Star (Beacon of Innovation) in top right -->
+  <g transform="translate(420, 80)">
+    <circle cx="0" cy="0" r="45" fill="url(#starGlow)" filter="url(#softGlow)"/>
+    <circle cx="0" cy="0" r="8" fill="#ffffff"/>
+    <!-- Star rays -->
+    <path d="M0 -30 L0 30 M-30 0 L30 0" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M-18 -18 L18 18 M-18 18 L18 -18" stroke="#A5B4FC" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Constellation points & floating sparkles -->
+  <circle cx="90" cy="120" r="2.5" fill="#ffffff" opacity="0.8"/>
+  <circle cx="160" cy="80" r="1.5" fill="#A5B4FC" opacity="0.6"/>
+  <circle cx="480" cy="260" r="3" fill="#F472B6" opacity="0.8"/>
+  <circle cx="110" cy="380" r="2" fill="#80A8FF" opacity="0.7"/>
+  <circle cx="460" cy="420" r="2" fill="#ffffff" opacity="0.85"/>
+  <circle cx="70" cy="240" r="1.5" fill="#F472B6" opacity="0.5"/>
+  <circle cx="340" cy="480" r="2.5" fill="#8B5CF6" opacity="0.7"/>
+
+  <!-- Space tether / energy flow line -->
+  <path d="M70 470 C 130 420, 150 490, 210 430 C 240 400, 230 360, 250 340" 
+        stroke="url(#visorGrad)" stroke-width="3" stroke-linecap="round" stroke-dasharray="6 4" opacity="0.7"/>
+
+  <!-- ASTRONAUT FIGURE FLOATING DIAGONALLY REACHING UPWARD -->
+  <g transform="translate(40, -10)">
+    <!-- Backpack Life Support -->
+    <rect x="180" y="210" width="65" height="110" rx="18" fill="#334155" transform="rotate(-25 212 265)"/>
+    <rect x="185" y="215" width="55" height="100" rx="14" fill="#475569" transform="rotate(-25 212 265)"/>
+    <circle cx="188" cy="240" r="6" fill="#F472B6"/>
+    <circle cx="181" cy="260" r="6" fill="#4D7CFF"/>
+
+    <!-- Left Leg (Background) -->
+    <path d="M225 320 C 210 370, 180 410, 145 440 C 135 448, 120 440, 125 425 C 135 395, 160 360, 185 310 Z" 
+          fill="url(#suitGrad)" stroke="#1E293B" stroke-width="3" stroke-linejoin="round"/>
+    <!-- Left Boot -->
+    <path d="M145 440 L 115 455 C 105 460, 100 445, 110 435 L 130 425 Z" 
+          fill="#334155" stroke="#1E293B" stroke-width="2.5"/>
+
+    <!-- Right Leg (Foreground - bent in zero gravity) -->
+    <path d="M255 330 C 265 375, 250 420, 220 460 C 210 472, 195 460, 205 445 C 225 415, 235 385, 225 340 Z" 
+          fill="url(#suitGrad)" stroke="#1E293B" stroke-width="3" stroke-linejoin="round"/>
+    <!-- Right Boot with accent sole -->
+    <path d="M220 460 L 235 490 C 240 500, 220 505, 210 495 L 195 470 Z" 
+          fill="#1E293B" stroke="#0F172A" stroke-width="2.5"/>
+    <path d="M210 495 L 235 490" stroke="#F472B6" stroke-width="3.5" stroke-linecap="round"/>
+
+    <!-- Torso / Suit -->
+    <path d="M245 200 C 290 220, 305 270, 285 330 C 265 350, 225 340, 215 315 C 205 260, 215 210, 245 200 Z" 
+          fill="url(#suitGrad)" stroke="#1E293B" stroke-width="3.5" stroke-linejoin="round"/>
+    
+    <!-- Chest control pack with tech badges -->
+    <rect x="235" y="235" width="45" height="38" rx="8" fill="#0F172A" transform="rotate(-15 257 254)"/>
+    <circle cx="245" cy="245" r="4" fill="#4D7CFF"/>
+    <circle cx="260" cy="242" r="4" fill="#10B981"/>
+    <circle cx="250" cy="260" r="3" fill="#F472B6"/>
+    <rect x="260" y="255" width="12" height="4" rx="2" fill="#8B5CF6"/>
+
+    <!-- Left Arm (Tucked/Guiding) -->
+    <path d="M225 215 C 195 235, 185 270, 195 295 C 198 302, 210 298, 208 290 C 200 270, 210 245, 235 230 Z" 
+          fill="url(#suitGrad)" stroke="#1E293B" stroke-width="3"/>
+    <!-- Left Glove -->
+    <circle cx="202" cy="298" r="9" fill="#334155" stroke="#1E293B" stroke-width="2"/>
+
+    <!-- Helmet Base & Ring -->
+    <ellipse cx="295" cy="170" rx="42" ry="44" fill="url(#suitGrad)" stroke="#1E293B" stroke-width="3.5"/>
+    <ellipse cx="285" cy="205" rx="26" ry="10" fill="#475569" transform="rotate(-20 285 205)"/>
+    
+    <!-- Helmet Radiant Visor with cosmic reflection -->
+    <ellipse cx="304" cy="168" rx="28" ry="32" fill="url(#visorGrad)" stroke="#1E1B4B" stroke-width="2.5" transform="rotate(12 304 168)"/>
+    <!-- Visor highlight reflection -->
+    <path d="M290 150 C 310 145, 325 155, 328 170" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.8"/>
+    <circle cx="324" cy="155" r="2.5" fill="#ffffff"/>
+
+    <!-- Right Arm (Reaching towards the celestial star!) -->
+    <path d="M280 215 C 320 200, 365 170, 400 135 C 408 128, 418 138, 412 145 C 375 185, 335 220, 290 240 Z" 
+          fill="url(#suitGrad)" stroke="#1E293B" stroke-width="3.5" stroke-linejoin="round"/>
+    
+    <!-- Right Glove (Reaching outward in wonder) -->
+    <g transform="translate(405, 125) rotate(-25)">
+      <path d="M0 10 C 5 2, 12 0, 18 5 C 24 10, 22 20, 14 24 C 8 26, 0 20, 0 10 Z" fill="#334155" stroke="#1E293B" stroke-width="2.5"/>
+      <!-- Fingers pointing to star -->
+      <path d="M16 6 L 26 2 C 29 1, 31 4, 28 7 L 18 12" stroke="#1E293B" stroke-width="2.5" fill="#475569" stroke-linecap="round"/>
+      <path d="M18 12 L 28 10 C 31 9, 32 12, 29 15 L 18 17" stroke="#1E293B" stroke-width="2.5" fill="#475569" stroke-linecap="round"/>
+      <path d="M16 18 L 25 19 C 27 19, 28 22, 25 24 L 14 23" stroke="#1E293B" stroke-width="2" fill="#475569" stroke-linecap="round"/>
+      <path d="M8 8 L 12 -1 C 14 -3, 17 -1, 15 2 L 11 11" stroke="#1E293B" stroke-width="2" fill="#475569" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

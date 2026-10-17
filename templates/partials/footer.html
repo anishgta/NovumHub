@@ -1,0 +1,60 @@
+<!--
+  templates/partials/footer.html
+  ==============================================================================
+  EDITORIAL ARCHITECTURAL FOOTER (Subpages)
+  Swiss precision, institutional telemetry, and clear navigation columns.
+  ==============================================================================
+-->
+<footer class="editorial-subpage-footer">
+  <div class="footer-inner-container">
+    <div class="footer-top-grid">
+      <div class="footer-col-brand">
+        <div class="footer-brand-title">
+          <span class="brand-text">{{ config_data.SITE_NAME }}</span>
+          <span class="brand-sub-badge">[AIT PUNE]</span>
+        </div>
+        <p class="footer-editorial-mission">
+          The autonomous innovation and research ledger for Army Institute of Technology.
+          Ensuring student engineering breakthroughs, laboratory findings, and hackathon prototypes are permanently auditable.
+        </p>
+        <div class="footer-telemetry-meta">
+          <div><span>INSTITUTION:</span> {{ config_data.COLLEGE_NAME }}</div>
+          <div><span>COORDINATES:</span> 18°36'07"N 73°52'42"E &bull; PUNE, INDIA</div>
+          <div><span>CONTACT:</span> <a href="mailto:{{ config_data.CONTACT_EMAIL }}">{{ config_data.CONTACT_EMAIL }}</a></div>
+        </div>
+      </div>
+
+      <div class="footer-col-links">
+        <div class="footer-link-group">
+          <h5 class="footer-group-title">01 / ARCHIVE & PLATFORM</h5>
+          <ul class="footer-link-list">
+            <li><a href="{{ url_for('submissions.browse') }}">All Contributions &rarr;</a></li>
+            <li><a href="{{ url_for('showcase.home') }}">Showcase Arena &rarr;</a></li>
+            <li><a href="{{ url_for('showcase.library') }}">Reference Library &rarr;</a></li>
+            <li><a href="{{ url_for('main.stats') }}">Campus Statistics &rarr;</a></li>
+            <li><a href="{{ url_for('main.about') }}">Institutional Manifesto &rarr;</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-link-group">
+          <h5 class="footer-group-title">02 / PARTICIPATION</h5>
+          <ul class="footer-link-list">
+            <li><a href="{{ url_for('submissions.submit') }}">Submit Contribution &nearr;</a></li>
+            <li><a href="{{ url_for('showcase.create_project') }}">Upload Demo Project &nearr;</a></li>
+            <li><a href="{{ url_for('auth.login') }}">Student / Faculty Sign In &rarr;</a></li>
+            <li><a href="{{ url_for('auth.register') }}">Create Account &rarr;</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom-telemetry">
+      <div class="footer-bottom-left">
+        <span>{{ config_data.FOOTER_COPYRIGHT }}</span>
+      </div>
+      <div class="footer-bottom-right">
+        <span>PYTHON 3.13 // FLASK CORE // SQLITE LEDGER // REV. 2026.10</span>
+      </div>
+    </div>
+  </div>
+</footer>

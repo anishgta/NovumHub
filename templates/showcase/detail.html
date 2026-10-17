@@ -1,0 +1,453 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.title }} - {{ config_data.SHOWCASE_NAME }}{% endblock %}
+
+{% block content %}
+<!-- Project Breadcrumb & Admin Toolbar -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+  <div style="font-size: 0.88rem; color: var(--muted-text);">
+    <a href="{{ url_for('showcase.home') }}" style="color: inherit;">Showcase</a>
+    &bull;
+    <a href="{{ url_for('showcase.event_detail', event_id=project.event_id) }}" style="color: inherit;">{{ project.event.name }}</a>
+    &bull;
+    <span style="color: var(--midnight-navy); font-weight: 700;">{{ project.track }}</span>
+  </div>
+
+  <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+    {% if current_user.is_authenticated and (project.can_edit(current_user) or current_user.is_admin) %}
+      <a href="{{ url_for('showcase.edit_project', project_id=project.id) }}" class="btn-editorial-outline" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">
+        &#9998; Edit Project
+      </a>
+    {% endif %}
+
+    {% if current_user.is_authenticated and (current_user.is_judge or current_user.is_admin) %}
+      <a href="{{ url_for('showcase.judge_project', project_id=project.id) }}" class="btn-gradient-pill" style="padding: 0.35rem 0.85rem; font-size: 0.82rem;">
+        &#9733; Score as Judge
+      </a>
+    {% endif %}
+
+    {% if current_user.is_authenticated and (current_user.is_admin or current_user.is_reviewer) %}
+      <form method="POST" action="{{ url_for('showcase.toggle_demo', project_id=project.id) }}" style="display: inline; margin: 0;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn-editorial-outline" style="padding: 0.35rem 0.85rem; font-size: 0.82rem; margin: 0; color: {% if project.demo_disabled %}#059669{% else %}#DC2626{% endif %};">
+          {% if project.demo_disabled %}&#10003; Re-enable Demo{% else %}&#9888; Disable Demo (Kill Switch){% endif %}
+        </button>
+      </form>
+    {% endif %}
+
+    {% if current_user.is_authenticated and current_user.is_admin %}
+      <form method="POST" action="{{ url_for('showcase.toggle_featured', project_id=project.id) }}" style="display: inline; margin: 0;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn-editorial-outline" style="padding: 0.35rem 0.85rem; font-size: 0.82rem; margin: 0;">
+          {% if project.is_featured %}Unfeature{% else %}&#9733; Feature{% endif %}
+        </button>
+      </form>
+      <form method="POST" action="{{ url_for('showcase.toggle_reference', project_id=project.id) }}" style="display: inline; margin: 0;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn-editorial-outline" style="padding: 0.35rem 0.85rem; font-size: 0.82rem; margin: 0;">
+          {% if project.is_reference %}Remove Reference{% else %}+ Reference Library{% endif %}
+        </button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Project Header Card -->
+<div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-sm);">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 280px;">
+      <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap;">
+        <span class="category-pill-tag tag-idea">{{ project.event.name }}</span>
+        <span class="category-pill-tag tag-research">{{ project.track }}</span>
+        <span class="category-pill-tag tag-infra">{{ project.demo_mode_label }}</span>
+        {% if project.is_featured %}
+          <span class="project-thumb-featured" style="position: static;">Featured</span>
+        {% endif %}
+        {% if project.is_reference %}
+          <span style="background: #ECFDF5; color: #059669; font-size: 0.76rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: var(--radius-full);">
+            &#128218; Reference Library
+          </span>
+        {% endif %}
+      </div>
+
+      <h1 style="font-size: clamp(1.8rem, 3.2vw, 2.5rem); font-weight: 800; color: var(--midnight-navy); margin-bottom: 0.5rem;">
+        {{ project.title }}
+      </h1>
+      <p style="font-size: 1.1rem; color: #475569; line-height: 1.6; margin-bottom: 1.25rem;">
+        {{ project.pitch }}
+      </p>
+
+      <div class="project-tags-row">
+        {% for tag in project.tech_tags_list %}
+          <span class="project-tag">{{ tag }}</span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Quick Stats & Actions Box -->
+    <div style="min-width: 220px; text-align: right; display: flex; flex-direction: column; gap: 0.75rem; align-items: flex-end;">
+      <!-- Upvote Form / Button -->
+      {% if current_user.is_authenticated %}
+        <form method="POST" action="{{ url_for('showcase.upvote', project_id=project.id) }}" style="margin: 0;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="upvote-btn {% if project.is_upvoted_by(current_user) %}upvoted{% endif %}">
+            &#9650; {{ project.upvote_count }} Upvotes
+          </button>
+        </form>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="upvote-btn">
+          &#9650; {{ project.upvote_count }} Upvotes
+        </a>
+      {% endif %}
+
+      {% if project.repo_url %}
+        <a href="{{ project.repo_url }}" target="_blank" rel="noopener noreferrer" class="btn-editorial-outline" style="font-size: 0.85rem; padding: 0.4rem 1rem;">
+          &#128279; View Code Repo &rarr;
+        </a>
+      {% endif %}
+
+      {% if project.linked_submission %}
+        <div style="font-size: 0.82rem; color: var(--muted-text); text-align: right;">
+          Evolved from idea: <br>
+          <a href="{{ url_for('submissions.detail', submission_id=project.linked_submission.id) }}" style="font-weight: 600;">
+            #{{ project.linked_submission.id }}: {{ project.linked_submission.title[:30] }}...
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Kill Switch Notice if Disabled -->
+{% if project.demo_disabled %}
+  <div class="alert alert-warning" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+    <span style="font-size: 1.5rem;">&#9888;</span>
+    <div>
+      <strong>Interactive Demonstration Temporarily Disabled</strong><br>
+      A reviewer has paused the live demo iframe for moderation review. Presentation slides, code, and developer notes remain accessible below.
+    </div>
+  </div>
+{% endif %}
+
+<!-- In-Page Tab Navigation -->
+<div class="showcase-tabs-nav" role="tablist">
+  <a href="{{ url_for('showcase.detail', project_id=project.id, tab='demo') }}" class="showcase-tab-btn {% if active_tab == 'demo' %}active{% endif %}">
+    &#127918; Live Demo
+  </a>
+  <a href="{{ url_for('showcase.detail', project_id=project.id, tab='presentation') }}" class="showcase-tab-btn {% if active_tab == 'presentation' %}active{% endif %}">
+    &#128202; Presentation Deck
+  </a>
+  <a href="{{ url_for('showcase.detail', project_id=project.id, tab='devnotes') }}" class="showcase-tab-btn {% if active_tab == 'devnotes' %}active{% endif %}">
+    &#128221; Developer Notes
+  </a>
+  <a href="{{ url_for('showcase.detail', project_id=project.id, tab='files') }}" class="showcase-tab-btn {% if active_tab == 'files' %}active{% endif %}">
+    &#128193; Files & Assets ({{ project.assets|length }})
+  </a>
+  <a href="{{ url_for('showcase.detail', project_id=project.id, tab='team') }}" class="showcase-tab-btn {% if active_tab == 'team' %}active{% endif %}">
+    &#128101; Team ({{ project.members|length }})
+  </a>
+  <a href="{{ url_for('showcase.detail', project_id=project.id, tab='discussion') }}" class="showcase-tab-btn {% if active_tab == 'discussion' %}active{% endif %}">
+    &#128172; Discussion ({{ project.comments|length }})
+  </a>
+</div>
+
+<!-- Tab 1: DEMO -->
+{% if active_tab == 'demo' %}
+  {% if project.demo_disabled %}
+    <div class="empty-showcase-card">
+      <p>The interactive demo is currently paused by moderators.</p>
+    </div>
+  {% elif project.demo_mode == 'hosted_webgl' and project.demo_entry_path %}
+    <div class="demo-viewport-container">
+      <div class="demo-stage-toolbar">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span class="pulsing-dot"></span>
+          <strong>Sandboxed Interactive Build</strong>
+          <span style="font-size: 0.75rem; color: #94A3B8;">(Isolated Environment)</span>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button onclick="document.getElementById('demo-frame').src=document.getElementById('demo-frame').src" class="btn-glass-pill" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">
+            &#8634; Restart
+          </button>
+          <button onclick="var f=document.getElementById('demo-frame'); if(f.requestFullscreen){f.requestFullscreen();}" class="btn-glass-pill" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">
+            &#x26F6; Fullscreen
+          </button>
+        </div>
+      </div>
+      <div class="demo-stage-iframe-wrap">
+        <iframe id="demo-frame"
+                src="{{ url_for('showcase.serve_demo', project_id=project.id, filename='index.html') }}"
+                sandbox="allow-scripts allow-pointer-lock allow-fullscreen"
+                allow="fullscreen; gamepad; accelerometer; gyroscope"
+                title="{{ project.title }} Interactive Demo">
+        </iframe>
+      </div>
+    </div>
+
+  {% elif project.demo_mode == 'external_embed' and project.demo_external_url %}
+    <div class="demo-viewport-container">
+      <div class="demo-stage-toolbar">
+        <span>External Interactive Embed ({{ project.demo_external_url[:45] }}...)</span>
+        <a href="{{ project.demo_external_url }}" target="_blank" rel="noopener noreferrer" class="btn-glass-pill" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">
+          Open in New Tab &rarr;
+        </a>
+      </div>
+      <div class="demo-stage-iframe-wrap">
+        <iframe id="demo-frame"
+                src="{{ project.demo_external_url }}"
+                sandbox="allow-scripts allow-pointer-lock allow-fullscreen allow-same-origin"
+                allow="fullscreen"
+                title="{{ project.title }} External Demo">
+        </iframe>
+      </div>
+    </div>
+
+  {% elif project.demo_mode == 'video' %}
+    <div style="background: #000000; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 2rem;">
+      {% if videos %}
+        <video controls style="width: 100%; max-height: 580px; display: block;" poster="{{ url_for('showcase.download_asset', asset_id=screenshots[0].id) if screenshots else '' }}">
+          <source src="{{ url_for('showcase.download_asset', asset_id=videos[0].id) }}" type="video/mp4">
+          Your browser does not support HTML5 video.
+        </video>
+      {% elif project.video_url %}
+        {% if 'youtube.com' in project.video_url or 'youtu.be' in project.video_url %}
+          {% set yt_id = project.video_url.split('v=')[-1].split('&')[0] if 'v=' in project.video_url else project.video_url.split('/')[-1] %}
+          <div style="position: relative; padding-bottom: 56.25%; height: 0;">
+            <iframe src="https://www.youtube-nocookie.com/embed/{{ yt_id }}" style="position: absolute; top:0; left: 0; width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
+          </div>
+        {% else %}
+          <div style="padding: 3rem; text-align: center; color: #FFFFFF;">
+            <p>External video link provided:</p>
+            <a href="{{ project.video_url }}" target="_blank" rel="noopener noreferrer" class="btn-gradient-pill">
+              &#9654; Watch Demo Video &rarr;
+            </a>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="empty-showcase-card">No video walkthrough uploaded yet.</div>
+      {% endif %}
+    </div>
+
+  {% elif project.demo_mode == 'download' and download_build %}
+    <div style="background: #FAF7FD; border: 2px dashed #CBD5E1; border-radius: var(--radius-md); padding: 3rem 2rem; text-align: center; margin-bottom: 2rem;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">&#128229;</div>
+      <h3 style="font-size: 1.5rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 0.5rem;">
+        Downloadable Project Build
+      </h3>
+      <p style="color: var(--muted-text); max-width: 500px; margin: 0 auto 1.5rem auto;">
+        This project runs as a native application. Download the precompiled build to run it locally on your machine.
+      </p>
+      <a href="{{ url_for('showcase.download_asset', asset_id=download_build.id) }}" class="btn-editorial-primary" style="font-size: 1.05rem; padding: 0.75rem 2rem;">
+        Download {{ download_build.title }} ({{ download_build.size_formatted }})
+      </a>
+    </div>
+
+  {% else %}
+    <!-- Screenshot Gallery fallback / Default gallery mode -->
+    {% if screenshots %}
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        {% for ss in screenshots %}
+          <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; background: #FFFFFF;">
+            <img src="{{ url_for('showcase.download_asset', asset_id=ss.id) }}" alt="{{ ss.title }}" style="width: 100%; height: 240px; object-fit: cover;">
+            {% if ss.title %}
+              <div style="padding: 0.75rem 1rem; font-size: 0.88rem; font-weight: 600; color: var(--midnight-navy);">
+                {{ ss.title }}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-showcase-card">
+        <p>No interactive demo or screenshots have been uploaded for this project yet.</p>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  <!-- Overview Description Text -->
+  <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem; margin-top: 2rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 0.75rem;">
+      Project Overview
+    </h3>
+    <p style="color: #334155; line-height: 1.7; font-size: 1rem; white-space: pre-line;">
+      {{ project.description }}
+    </p>
+  </div>
+{% endif %}
+
+<!-- Tab 2: PRESENTATION DECK -->
+{% if active_tab == 'presentation' %}
+  {% if pdf_asset %}
+    <div style="margin-bottom: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--midnight-navy); margin: 0;">
+          Slide Deck Preview (PDF)
+        </h3>
+        <div style="display: flex; gap: 0.5rem;">
+          <a href="{{ url_for('showcase.download_asset', asset_id=pdf_asset.id) }}" target="_blank" class="btn-editorial-outline" style="font-size: 0.85rem;">
+            &#128065; Full Screen PDF
+          </a>
+          {% if source_deck %}
+            <a href="{{ url_for('showcase.download_asset', asset_id=source_deck.id) }}" class="btn-editorial-primary" style="font-size: 0.85rem;">
+              &#128229; Download Slides ({{ source_deck.file_extension }})
+            </a>
+          {% endif %}
+        </div>
+      </div>
+      <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; height: 680px; background: #525659;">
+        <iframe src="{{ url_for('showcase.download_asset', asset_id=pdf_asset.id) }}#toolbar=1" width="100%" height="100%" style="border: none;">
+          <p>Your browser does not support inline PDFs. <a href="{{ url_for('showcase.download_asset', asset_id=pdf_asset.id) }}">Click here to download</a>.</p>
+        </iframe>
+      </div>
+    </div>
+  {% else %}
+    <div class="empty-showcase-card">
+      <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">&#128202;</div>
+      <h4>No Presentation Deck Uploaded</h4>
+      <p style="color: var(--muted-text);">The team has not uploaded an inline presentation deck (PDF) yet.</p>
+      {% if source_deck %}
+        <a href="{{ url_for('showcase.download_asset', asset_id=source_deck.id) }}" class="btn-editorial-primary">
+          Download Source Slides ({{ source_deck.file_extension }})
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endif %}
+
+<!-- Tab 3: DEVELOPER NOTES -->
+{% if active_tab == 'devnotes' %}
+  {% if rendered_notes %}
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      {% for sec_key, sec_title in config_data.SHOWCASE_DEVNOTE_SECTIONS.items() %}
+        {% if rendered_notes.get(sec_key) %}
+          <div class="devnote-card">
+            <h3>{{ sec_title }}</h3>
+            <div class="devnote-content">
+              {{ rendered_notes[sec_key]|safe }}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-showcase-card">
+      <p>Developer notes have not been published for this project yet.</p>
+    </div>
+  {% endif %}
+{% endif %}
+
+<!-- Tab 4: FILES & ASSETS -->
+{% if active_tab == 'files' %}
+  <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 1.25rem;">
+      Downloadable Assets & Documentation
+    </h3>
+    {% if project.assets|length > 0 %}
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        {% for a in project.assets %}
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1rem; border: 1px solid var(--border-light); border-radius: var(--radius-sm); background: #F8FAFC;">
+            <div>
+              <strong>{{ a.title }}</strong>
+              <div style="font-size: 0.8rem; color: #64748B;">
+                {{ a.kind_label }} &bull; {{ a.file_extension|upper }} &bull; {{ a.size_formatted }}
+              </div>
+            </div>
+            <a href="{{ url_for('showcase.download_asset', asset_id=a.id) }}" class="btn-editorial-outline" style="font-size: 0.82rem; padding: 0.35rem 0.85rem;">
+              &#128229; Download
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="color: var(--muted-text);">No supplementary files uploaded.</p>
+    {% endif %}
+  </div>
+{% endif %}
+
+<!-- Tab 5: TEAM -->
+{% if active_tab == 'team' %}
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+    {% for m in project.members %}
+      <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; text-align: center;">
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: #EEF2FF; color: var(--electric-blue); font-weight: 800; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem auto;">
+          {{ m.display_name[:1]|upper }}
+        </div>
+        <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--midnight-navy); margin-bottom: 0.25rem;">
+          {{ m.display_name }}
+        </h4>
+        <div style="font-size: 0.85rem; color: var(--violet); font-weight: 600; margin-bottom: 0.5rem;">
+          {{ m.role }}
+        </div>
+        {% if m.links %}
+          <div style="font-size: 0.8rem; color: #64748B; word-break: break-all;">
+            <a href="{{ m.links }}" target="_blank" rel="noopener noreferrer">{{ m.links }}</a>
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- Tab 6: DISCUSSION -->
+{% if active_tab == 'discussion' %}
+  <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 1.25rem;">
+      Constructive Community Discussion & Feedback
+    </h3>
+
+    <!-- Post Comment Form -->
+    {% if current_user.is_authenticated %}
+      <form method="POST" action="{{ url_for('showcase.comment', project_id=project.id) }}" style="margin-bottom: 2rem;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div style="margin-bottom: 0.75rem;">
+          <textarea name="body" rows="3" placeholder="Share constructive feedback, ask questions about their architecture, or applaud the team..." required></textarea>
+        </div>
+        <button type="submit" class="btn-editorial-primary" style="font-size: 0.88rem;">
+          Post Comment
+        </button>
+      </form>
+    {% else %}
+      <div style="background: #F8FAFC; border: 1px solid var(--border-light); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 2rem;">
+        <a href="{{ url_for('auth.login') }}" style="font-weight: 700;">Log in</a> to join the discussion and provide feedback.
+      </div>
+    {% endif %}
+
+    <!-- Comments List -->
+    {% if project.comments|length > 0 %}
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        {% for c in project.comments %}
+          <div style="border-left: 3px solid var(--violet); padding-left: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+              <span style="font-weight: 700; color: var(--midnight-navy); font-size: 0.92rem;">
+                {{ c.author.name }}
+                {% if c.author.is_judge %}
+                  <span style="background: #F5F3FF; color: var(--violet); font-size: 0.72rem; padding: 0.15rem 0.45rem; border-radius: var(--radius-full); margin-left: 0.35rem;">Judge</span>
+                {% elif c.author.is_reviewer %}
+                  <span style="background: #EFF6FF; color: #2563EB; font-size: 0.72rem; padding: 0.15rem 0.45rem; border-radius: var(--radius-full); margin-left: 0.35rem;">Reviewer</span>
+                {% endif %}
+              </span>
+              <span style="font-size: 0.78rem; color: #94A3B8;">{{ c.created_at.strftime('%b %d, %Y') }}</span>
+            </div>
+            <p style="color: #334155; font-size: 0.92rem; line-height: 1.5; margin: 0; white-space: pre-line;">
+              {{ c.body }}
+            </p>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="color: var(--muted-text);">No comments posted yet. Be the first to start the discussion!</p>
+    {% endif %}
+  </div>
+{% endif %}
+
+<!-- Report Link in Footer of Detail Page -->
+<div style="margin-top: 3rem; text-align: center;">
+  <form method="POST" action="{{ url_for('showcase.report', project_id=project.id) }}" style="display: inline;" onsubmit="var r = prompt('Please explain why you are reporting this project:'); if(!r) return false; this.reason.value = r;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="reason" value="">
+    <button type="submit" style="background: transparent !important; border: none !important; color: #94A3B8; font-size: 0.8rem; cursor: pointer; text-decoration: underline;">
+      &#9873; Report inappropriate or copyrighted content to moderators
+    </button>
+  </form>
+</div>
+{% endblock %}

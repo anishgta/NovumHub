@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}Triage #{{ submission.id }} - {{ config_data.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 940px; margin: 1rem auto;">
+  
+  <div style="margin-bottom: 1.25rem;">
+    <a href="{{ url_for('review.queue') }}">&larr; Back to Triage Queue</a>
+  </div>
+
+  <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 2rem; align-items: start;">
+    
+    <!-- Left Column: Submission Details & Audit Log -->
+    <div>
+      <article style="background: var(--card-bg); padding: 1.75rem; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.8rem; flex-wrap: wrap;">
+          <span class="badge" style="font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+            <img src="{{ url_for('static', filename='icons/icon-' + submission.category + '.svg') }}" class="site-icon" alt="">
+            {{ config_data.CATEGORIES.get(submission.category, {}).get('name') }}
+          </span>
+          {% set status_val = submission.status %}
+          {% include 'partials/status_badge.html' %}
+        </div>
+
+        <h2 style="color: var(--primary-color); margin-bottom: 0.5rem;">{{ submission.title }}</h2>
+        
+        <!-- Submitter Details (Real identity verified for reviewers) -->
+        <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.9rem; margin-bottom: 1.25rem; font-size: 0.85rem;">
+          <h5 style="margin: 0 0 0.4rem 0; color: var(--primary-color);">Submitter Information</h5>
+          <div><strong>Name:</strong> {{ submission.author.name }} ({{ submission.author.email }})</div>
+          <div><strong>Department:</strong> {{ submission.author.department or 'N/A' }} &bull; <strong>Year:</strong> {{ submission.author.year or 'N/A' }}</div>
+          {% if submission.author.display_registration_no and (current_user.is_admin or (current_user.is_authenticated and current_user.id == submission.author_id)) %}
+            <div><strong>Registration No:</strong> {{ submission.author.display_registration_no }}</div>
+          {% endif %}
+          {% if submission.anonymous_public %}
+            <div style="color: #d97706; margin-top: 0.3rem; display: flex; align-items: center; gap: 0.35rem;">
+              <img src="{{ url_for('static', filename='icons/icon-alert.svg') }}" class="site-icon" alt=""> Student requested anonymous display on the public feed.
+            </div>
+          {% endif %}
+        </div>
+
+        <div style="margin-bottom: 1.2rem;">
+          <h5 style="margin-bottom: 0.2rem; text-transform: uppercase; font-size: 0.75rem; color: var(--text-muted);">Summary</h5>
+          <p style="margin: 0; font-size: 0.95rem;">{{ submission.summary }}</p>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <h5 style="margin-bottom: 0.2rem; text-transform: uppercase; font-size: 0.75rem; color: var(--text-muted);">Full Write-Up</h5>
+          <div style="white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6;">{{ submission.details }}</div>
+        </div>
+
+        <!-- Extra category fields -->
+        {% set extra = submission.extra_fields %}
+        {% if submission.category == 'idea' %}
+          <div style="background: #fffbeb; padding: 0.9rem; border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: 1rem;">
+            <strong>Expected Impact:</strong> {{ extra.get('expected_impact', 'None provided') }}<br>
+            <strong>Resources Needed:</strong> {{ extra.get('resources_needed', 'None provided') }}
+          </div>
+        {% elif submission.category == 'research' %}
+          <div style="background: #eff6ff; padding: 0.9rem; border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: 1rem;">
+            <strong>Methodology:</strong> {{ extra.get('methodology', 'None provided') }}<br>
+            <strong>Key Results:</strong> {{ extra.get('key_results', 'None provided') }}<br>
+            {% if extra.get('link_or_doi') %}
+              <strong>Reference:</strong> <a href="{{ extra.get('link_or_doi') }}" target="_blank">{{ extra.get('link_or_doi') }}</a>
+            {% endif %}
+          </div>
+        {% elif submission.category == 'correction' %}
+          <div style="background: #faf5ff; padding: 0.9rem; border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: 1rem;">
+            <strong>Item Corrected:</strong> {{ extra.get('item_corrected') }}<br>
+            <strong style="color: #991b1b;">What is Wrong:</strong> {{ extra.get('what_is_wrong') }}<br>
+            <strong style="color: #166534;">What is Correct:</strong> {{ extra.get('what_is_correct') }}<br>
+            <strong>Evidence / Source:</strong> <em>{{ extra.get('evidence_source') }}</em>
+          </div>
+        {% elif submission.category == 'infrastructure' %}
+          <div style="background: #ecfdf5; padding: 0.9rem; border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: 1rem;">
+            <strong>Location:</strong> {{ extra.get('location') }}<br>
+            <strong>Problem:</strong> {{ extra.get('problem') }}<br>
+            <strong>Solution:</strong> {{ extra.get('solution') }}<br>
+            <strong>Priority:</strong> {{ extra.get('priority', 'Medium') }}
+          </div>
+        {% endif %}
+
+        {% if submission.attachment_path %}
+          <div style="padding: 0.8rem; background: #f1f5f9; border-radius: var(--radius-sm); font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+            <span style="display: inline-flex; align-items: center; gap: 0.35rem;">
+              <img src="{{ url_for('static', filename='icons/icon-attachment.svg') }}" class="site-icon" alt=""> Attachment: {{ submission.attachment_path }}
+            </span>
+            <a href="{{ url_for('submissions.uploaded_file', filename=submission.attachment_path) }}" target="_blank" role="button" class="btn-accent" style="padding: 0.2rem 0.6rem; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+              <img src="{{ url_for('static', filename='icons/icon-download.svg') }}" class="site-icon" alt=""> Download
+            </a>
+          </div>
+        {% endif %}
+
+        <div style="margin-top: 1.5rem; pt-3; border-top: 1px solid var(--border-color);">
+          <a href="{{ url_for('submissions.detail', submission_id=submission.id) }}" target="_blank" style="font-size: 0.85rem;">
+            View Public Page &rarr;
+          </a>
+        </div>
+      </article>
+
+      <!-- Full Audit History -->
+      <article style="background: var(--card-bg); padding: 1.75rem; border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+        <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Triage Audit Trail</h4>
+        <div class="timeline">
+          {% for ev in submission.status_history %}
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-header">
+                {{ ev.from_status }} &rarr; <strong>{{ ev.to_status }}</strong>
+              </div>
+              <div class="timeline-date">
+                {{ ev.created_at.strftime('%d %b %Y, %I:%M %p') }} &bull; By {{ ev.actor.name }}
+              </div>
+              {% if ev.public_comment %}
+                <div class="timeline-comment">
+                  <strong>Public Feedback:</strong> {{ ev.public_comment }}
+                </div>
+              {% endif %}
+              {% if ev.internal_note %}
+                <div class="internal-note-box" style="display: flex; align-items: flex-start; gap: 0.35rem;">
+                  <img src="{{ url_for('static', filename='icons/icon-lock.svg') }}" class="site-icon" alt="" style="margin-top: 0.15rem;">
+                  <div><strong>Internal Note:</strong> {{ ev.internal_note }}</div>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </article>
+    </div>
+
+    <!-- Right Column: Status Change Form -->
+    <aside>
+      <article style="background: var(--card-bg); padding: 1.5rem; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); position: sticky; top: 80px;">
+        <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Update Status</h4>
+
+        <form method="POST" action="{{ url_for('review.triage', submission_id=submission.id) }}">
+          {{ form.hidden_tag() }}
+
+          <label for="to_status">
+            {{ form.to_status.label }}
+            {{ form.to_status(id="to_status") }}
+          </label>
+
+          <label for="public_comment">
+            {{ form.public_comment.label }}
+            {{ form.public_comment(rows=4, placeholder="Visible to the student submitter. Explain acceptance, necessary changes, or reasons...") }}
+          </label>
+
+          <label for="internal_note">
+            {{ form.internal_note.label }}
+            {{ form.internal_note(rows=3, placeholder="Only visible to fellow reviewers and administrators...") }}
+          </label>
+
+          {{ form.submit(class="btn-accent", style="width: 100%; margin-top: 0.5rem;") }}
+        </form>
+      </article>
+    </aside>
+
+  </div>
+
+</div>
+{% endblock %}

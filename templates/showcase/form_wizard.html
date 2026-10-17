@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if project %}Edit {{ project.title }}{% else %}New Project Submission{% endif %} - Step {{ step }}: {{ step_name }}
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto 3rem auto;">
+
+  <!-- Wizard Header & Progress Bar -->
+  <div style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--midnight-navy); margin: 0;">
+        {% if project %}Edit Showcase Project{% else %}Submit Project Demonstration{% endif %}
+      </h2>
+      {% if project %}
+        <a href="{{ url_for('showcase.detail', project_id=project.id) }}" class="btn-editorial-outline" style="font-size: 0.85rem;">
+          &larr; View Project Page
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Stepper Navigation -->
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.5rem; text-align: center; font-size: 0.78rem; font-weight: 700;">
+      {% set steps = [
+        (1, 'Basics', 'step_basics'),
+        (2, 'Demo', 'step_demo'),
+        (3, 'Team', 'step_team'),
+        (4, 'Assets', 'step_assets'),
+        (5, 'Dev Notes', 'step_devnotes'),
+        (6, 'Publish', 'step_review')
+      ] %}
+      {% for s_num, s_label, s_route in steps %}
+        {% if project %}
+          <a href="{{ url_for('showcase.' ~ s_route, project_id=project.id) }}" 
+             style="text-decoration: none; padding: 0.5rem 0.2rem; border-radius: var(--radius-sm); border: 1.5px solid {% if step == s_num %}var(--electric-blue){% else %}#E2E8F0{% endif %}; background: {% if step == s_num %}#EEF2FF{% else %}#FFFFFF{% endif %}; color: {% if step == s_num %}var(--electric-blue){% else %}#64748B{% endif %};">
+            {{ s_num }}. {{ s_label }}
+          </a>
+        {% else %}
+          <div style="padding: 0.5rem 0.2rem; border-radius: var(--radius-sm); border: 1.5px solid {% if step == s_num %}var(--electric-blue){% else %}#E2E8F0{% endif %}; background: {% if step == s_num %}#EEF2FF{% else %}#F8FAFC{% endif %}; color: {% if step == s_num %}var(--electric-blue){% else %}#94A3B8{% endif %};">
+            {{ s_num }}. {{ s_label }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; box-shadow: var(--shadow-sm);">
+    
+    <!-- STEP 1: BASICS -->
+    {% if step == 1 %}
+      <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 0.5rem;">
+        Step 1: Project Metadata & Event Selection
+      </h3>
+      <p style="color: var(--muted-text); font-size: 0.92rem; margin-bottom: 1.5rem;">
+        Tell us the core identity of your project, which hackathon you competed in, and which track you tackled.
+      </p>
+
+      <form method="POST">
+        {{ form.hidden_tag() }}
+        <div style="margin-bottom: 1rem;">
+          {{ form.title.label }}
+          {{ form.title(placeholder="e.g. AIT Campus Navigation Assistant (AR)") }}
+          {% for error in form.title.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          {{ form.pitch.label }}
+          {{ form.pitch(placeholder="A one-sentence summary explaining what the project does and who it helps.") }}
+          {% for error in form.pitch.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            {{ form.event_id.label }}
+            {{ form.event_id() }}
+          </div>
+          <div>
+            {{ form.track.label }}
+            {{ form.track(placeholder="e.g. AI & Automation, Campus Tech, Web3") }}
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            {{ form.team_name.label }}
+            {{ form.team_name(placeholder="e.g. CyberKnights") }}
+          </div>
+          <div>
+            {{ form.tech_tags.label }}
+            {{ form.tech_tags(placeholder="e.g. Unity, C#, WebGL, Blender") }}
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          {{ form.description.label }}
+          {{ form.description(rows=5, placeholder="Provide a detailed description of your hackathon project, features, and workflow.") }}
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+          <div>
+            {{ form.repo_url.label }}
+            {{ form.repo_url(placeholder="https://github.com/your-team/project") }}
+          </div>
+          <div>
+            {{ form.linked_submission_id.label }}
+            {{ form.linked_submission_id() }}
+          </div>
+        </div>
+
+        <button type="submit" class="btn-editorial-primary" style="font-size: 1rem; padding: 0.75rem 2rem;">
+          Save & Proceed to Demo Setup &rarr;
+        </button>
+      </form>
+    {% endif %}
+
+    <!-- STEP 2: DEMO -->
+    {% if step == 2 %}
+      <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 0.5rem;">
+        Step 2: Interactive Demo Configuration
+      </h3>
+      <p style="color: var(--muted-text); font-size: 0.92rem; margin-bottom: 1.5rem;">
+        Choose how judges and visitors interact with your project demonstration.
+      </p>
+
+      <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+
+        <div style="margin-bottom: 1.5rem;">
+          {{ form.demo_mode.label }}
+          {{ form.demo_mode(id="demo-mode-select", onchange="updateDemoFields()") }}
+        </div>
+
+        <!-- Mode A: Hosted WebGL / HTML5 ZIP -->
+        <div id="section-hosted_webgl" style="display: none; background: #F8FAFC; border: 1px solid var(--border-light); padding: 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+          <h4 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem;">&#127918; Upload Hosted WebGL / HTML5 Build (.zip)</h4>
+          <p style="font-size: 0.85rem; color: #64748B; margin-bottom: 0.8rem;">
+            Upload a .zip file containing your compiled Unity WebGL, Godot HTML5, or web app export. 
+            Must contain an <code>index.html</code> file. (Max zip: {{ config_data.SHOWCASE_MAX_ZIP_MB }}MB).
+          </p>
+          {% if project.demo_entry_path %}
+            <div style="color: #059669; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.8rem;">
+              &#10003; Active hosted build extracted at: <code>{{ project.demo_entry_path }}</code>
+            </div>
+          {% endif %}
+          {{ form.demo_zip() }}
+        </div>
+
+        <!-- Mode B: External Embed URL -->
+        <div id="section-external_embed" style="display: none; background: #F8FAFC; border: 1px solid var(--border-light); padding: 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+          <h4 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem;">&#127760; External Interactive Embed URL</h4>
+          <p style="font-size: 0.85rem; color: #64748B; margin-bottom: 0.8rem;">
+            Allowed hosts: <code>{{ config_data.SHOWCASE_ALLOWED_EMBED_HOSTS|join(', ') }}</code>
+          </p>
+          {{ form.demo_external_url(placeholder="https://huggingface.co/spaces/...") }}
+        </div>
+
+        <!-- Mode C: Video Demo -->
+        <div id="section-video" style="display: none; background: #F8FAFC; border: 1px solid var(--border-light); padding: 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+          <h4 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem;">&#9654; Video Demo</h4>
+          <div style="margin-bottom: 1rem;">
+            {{ form.video_url.label }}
+            {{ form.video_url(placeholder="https://www.youtube.com/watch?v=...") }}
+          </div>
+          <div>
+            {{ form.video_file.label }}
+            {{ form.video_file() }}
+          </div>
+        </div>
+
+        <!-- Mode D: Downloadable Build -->
+        <div id="section-download" style="display: none; background: #F8FAFC; border: 1px solid var(--border-light); padding: 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+          <h4 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem;">&#128229; Downloadable Precompiled Application</h4>
+          <p style="font-size: 0.85rem; color: #64748B; margin-bottom: 0.8rem;">
+            Upload your Windows .exe/.zip, Android .apk, or packaged binary.
+          </p>
+          {{ form.download_file() }}
+        </div>
+
+        <button type="submit" class="btn-editorial-primary" style="font-size: 1rem; padding: 0.75rem 2rem;">
+          Save & Proceed to Team Members &rarr;
+        </button>
+      </form>
+
+      <script>
+        function updateDemoFields() {
+          var mode = document.getElementById('demo-mode-select').value;
+          ['hosted_webgl', 'external_embed', 'video', 'download'].forEach(function(m) {
+            var el = document.getElementById('section-' + m);
+            if (el) el.style.display = (m === mode) ? 'block' : 'none';
+          });
+        }
+        updateDemoFields();
+      </script>
+    {% endif %}
+
+    <!-- STEP 3: TEAM -->
+    {% if step == 3 %}
+      <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 0.5rem;">
+        Step 3: Team Members
+      </h3>
+      <p style="color: var(--muted-text); font-size: 0.92rem; margin-bottom: 1.5rem;">
+        List the students who built this project.
+      </p>
+
+      <!-- Existing Members Table -->
+      {% if project.members|length > 0 %}
+        <div style="margin-bottom: 2rem;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 2px solid #E2E8F0; text-align: left; font-size: 0.85rem; color: #64748B;">
+                <th style="padding: 0.5rem;">Name</th>
+                <th style="padding: 0.5rem;">Role</th>
+                <th style="padding: 0.5rem;">Links</th>
+                <th style="padding: 0.5rem; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in project.members %}
+                <tr style="border-bottom: 1px solid #E2E8F0; font-size: 0.9rem;">
+                  <td style="padding: 0.75rem 0.5rem; font-weight: 700; color: var(--midnight-navy);">{{ m.display_name }}</td>
+                  <td style="padding: 0.75rem 0.5rem; color: #475569;">{{ m.role }}</td>
+                  <td style="padding: 0.75rem 0.5rem; color: #64748B;">{{ m.links or '--' }}</td>
+                  <td style="padding: 0.75rem 0.5rem; text-align: right;">
+                    <form method="POST" action="{{ url_for('showcase.delete_member', project_id=project.id, member_id=m.id) }}" style="display: inline; margin: 0;">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" style="background: none; border: none; color: #DC2626; cursor: pointer; font-size: 0.85rem;">Remove</button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+
+      <!-- Add Member Form -->
+      <div style="background: #F8FAFC; border: 1px solid var(--border-light); padding: 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+        <h4 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem;">+ Add Team Member</h4>
+        <form method="POST">
+          {{ form.hidden_tag() }}
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              {{ form.display_name.label }}
+              {{ form.display_name(placeholder="Full Name") }}
+            </div>
+            <div>
+              {{ form.role.label }}
+              {{ form.role(placeholder="e.g. ML Lead, 3D Modeler, Frontend") }}
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              {{ form.user_email.label }}
+              {{ form.user_email(placeholder="student@aitpune.edu.in (optional)") }}
+            </div>
+            <div>
+              {{ form.links.label }}
+              {{ form.links(placeholder="LinkedIn / GitHub URL") }}
+            </div>
+          </div>
+          <button type="submit" class="btn-accent" style="font-size: 0.88rem; padding: 0.5rem 1.2rem;">
+            + Add Member
+          </button>
+        </form>
+      </div>
+
+      <div style="text-align: right; margin-top: 1.5rem;">
+        <a href="{{ url_for('showcase.step_assets', project_id=project.id) }}" class="btn-editorial-primary" style="font-size: 1rem; padding: 0.75rem 2rem;">
+          Continue to Presentation & Assets &rarr;
+        </a>
+      </div>
+    {% endif %}
+
+    <!-- STEP 4: ASSETS -->
+    {% if step == 4 %}
+      <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 0.5rem;">
+        Step 4: Presentation Decks & Supporting Files
+      </h3>
+      <p style="color: var(--muted-text); font-size: 0.92rem; margin-bottom: 1.5rem;">
+        Upload your pitch deck (PDF for in-browser viewing, PPTX for download), documentation, and screenshots.
+      </p>
+
+      {% if project.assets|length > 0 %}
+        <div style="margin-bottom: 2rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">Uploaded Assets</h4>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            {% for a in project.assets %}
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 1rem; border: 1px solid var(--border-light); border-radius: var(--radius-sm); background: #F8FAFC;">
+                <div>
+                  <strong>{{ a.title }}</strong>
+                  <span style="font-size: 0.8rem; color: #64748B; margin-left: 0.5rem;">({{ a.kind_label }}, {{ a.size_formatted }})</span>
+                </div>
+                <form method="POST" action="{{ url_for('showcase.delete_asset', project_id=project.id, asset_id=a.id) }}" style="display: inline; margin: 0;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" style="background: none; border: none; color: #DC2626; cursor: pointer; font-size: 0.82rem;">Delete</button>
+                </form>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div style="background: #F8FAFC; border: 1px solid var(--border-light); padding: 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem;">Presentation Pitch Deck (PDF)</h4>
+          <p style="font-size: 0.82rem; color: #64748B; margin-bottom: 0.6rem;">Enables judges to browse your presentation deck right inside the browser.</p>
+          {{ form.presentation_pdf() }}
+        </div>
+
+        <div style="background: #F8FAFC; border: 1px solid var(--border-light); padding: 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem;">Original Source Deck (.pptx / .key)</h4>
+          <p style="font-size: 0.82rem; color: #64748B; margin-bottom: 0.6rem;">Optional download fallback for PowerPoint slides.</p>
+          {{ form.presentation_source() }}
+        </div>
+
+        <div style="background: #F8FAFC; border: 1px solid var(--border-light); padding: 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem;">Screenshots / Poster (.png, .jpg)</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+              {{ form.screenshot_caption.label }}
+              {{ form.screenshot_caption(placeholder="e.g. System Architecture Diagram") }}
+            </div>
+            <div>
+              {{ form.screenshot_file.label }}
+              {{ form.screenshot_file() }}
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+          <button type="submit" class="btn-accent" style="font-size: 0.88rem; padding: 0.5rem 1.2rem;">
+            + Upload Selected Files
+          </button>
+          <a href="{{ url_for('showcase.step_devnotes', project_id=project.id) }}" class="btn-editorial-primary" style="font-size: 1rem; padding: 0.75rem 2rem;">
+            Continue to Developer Notes &rarr;
+          </a>
+        </div>
+      </form>
+    {% endif %}
+
+    <!-- STEP 5: DEV NOTES -->
+    {% if step == 5 %}
+      <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 0.5rem;">
+        Step 5: Structured Developer Notes
+      </h3>
+      <p style="color: var(--muted-text); font-size: 0.92rem; margin-bottom: 1.5rem;">
+        Document the technical depth of your build across 8 standard sections. Markdown formatting is supported!
+      </p>
+
+      <form method="POST">
+        {{ form.hidden_tag() }}
+
+        {% for sec_key, sec_title in sections.items() %}
+          <div style="margin-bottom: 1.75rem;">
+            <label style="font-weight: 700; font-size: 1.02rem; color: var(--midnight-navy); margin-bottom: 0.3rem; display: block;">
+              {{ sec_title }}
+            </label>
+            {{ form[sec_key](rows=4, placeholder="Write in Markdown...") }}
+          </div>
+        {% endfor %}
+
+        <button type="submit" class="btn-editorial-primary" style="font-size: 1rem; padding: 0.75rem 2rem;">
+          Save Notes & Review &rarr;
+        </button>
+      </form>
+    {% endif %}
+
+    <!-- STEP 6: REVIEW & PUBLISH -->
+    {% if step == 6 %}
+      <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 0.5rem;">
+        Step 6: Review & Publish
+      </h3>
+      <p style="color: var(--muted-text); font-size: 0.92rem; margin-bottom: 1.5rem;">
+        Review your project completeness before publishing to the campus Showcase.
+      </p>
+
+      <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 1.5rem; margin-bottom: 2rem;">
+        <h4 style="font-size: 1.15rem; font-weight: 800; color: var(--midnight-navy); margin-bottom: 0.75rem;">
+          {{ project.title }}
+        </h4>
+        <p style="color: #475569; margin-bottom: 1rem;">{{ project.pitch }}</p>
+
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+          <li>&#10003; <strong>Demo Mode:</strong> {{ project.demo_mode_label }}</li>
+          <li>&#10003; <strong>Team:</strong> {{ project.team_name }} ({{ project.members|length }} members listed)</li>
+          <li>&#10003; <strong>Uploaded Assets:</strong> {{ project.assets|length }} files</li>
+          <li>&#10003; <strong>Dev Notes:</strong> {{ project.dev_notes|length }} sections filled</li>
+          <li><strong>Current Status:</strong> <span style="text-transform: uppercase; font-weight: 700; color: var(--electric-blue);">{{ project.status }}</span></li>
+        </ul>
+      </div>
+
+      <form method="POST" style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" name="action" value="draft" class="btn-editorial-outline" style="font-size: 0.95rem; padding: 0.75rem 1.5rem;">
+          Save as Draft
+        </button>
+        <button type="submit" name="action" value="publish" class="btn-editorial-primary" style="font-size: 1rem; padding: 0.75rem 2.2rem;">
+          &#128640; Publish to Showcase
+        </button>
+      </form>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

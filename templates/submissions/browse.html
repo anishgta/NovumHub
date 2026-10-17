@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Archive - {{ config_data.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<!-- Browse feed header -->
+<div class="paper-card" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+      <span class="paper-stamp stamp-accent">[PUBLIC ARCHIVE // VERIFIED LEDGER]</span>
+      <span class="paper-stamp">[AIT PUNE]</span>
+    </div>
+    <h1 style="margin: 0.2rem 0; font-size: 2.1rem; font-weight: 800;">Campus Contributions</h1>
+    <p style="color: var(--paper-ink-muted); margin: 0; font-size: 0.95rem;">
+      Explore student ideas, research findings, academic integrity corrections, and campus improvements at {{ config_data.COLLEGE_SHORT_NAME }}.
+    </p>
+  </div>
+  {% if current_user.is_authenticated %}
+    <a href="{{ url_for('submissions.submit') }}" class="btn-paper btn-paper-accent">
+      + Submit Contribution &nearr;
+    </a>
+  {% endif %}
+</div>
+
+<!-- ========================================================================
+     SEARCH & FILTER BAR (BOXY PAPER CARD)
+     ======================================================================== -->
+<form method="GET" action="{{ url_for('submissions.browse') }}" class="paper-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end; margin-bottom: 1rem;">
+    <!-- Keyword Search -->
+    <div>
+      <label for="q">Keyword Search</label>
+      <input type="search" id="q" name="q" value="{{ search_query }}" placeholder="Search title, tags, text...">
+    </div>
+
+    <!-- Category Filter -->
+    <div>
+      <label for="category">Category</label>
+      <select id="category" name="category">
+        <option value="">All Categories</option>
+        {% for cat_key, cat_data in config_data.CATEGORIES.items() %}
+          <option value="{{ cat_key }}" {% if category_filter == cat_key %}selected{% endif %}>
+            {{ cat_data.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Department Filter -->
+    <div>
+      <label for="department">Department</label>
+      <select id="department" name="department">
+        <option value="">All Departments</option>
+        {% for dept in config_data.DEPARTMENTS %}
+          <option value="{{ dept }}" {% if department_filter == dept %}selected{% endif %}>
+            {{ dept }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Sort By -->
+    <div>
+      <label for="sort">Sort By</label>
+      <select id="sort" name="sort">
+        <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+        <option value="upvotes" {% if sort_by == 'upvotes' %}selected{% endif %}>Most Upvoted</option>
+      </select>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 0.6rem; justify-content: flex-end; border-top: 1px dashed var(--paper-crease); padding-top: 0.85rem;">
+    {% if search_query or category_filter or department_filter or sort_by != 'newest' %}
+      <a href="{{ url_for('submissions.browse') }}" class="btn-paper btn-paper-outline" style="padding: 0.4rem 0.9rem;">
+        Reset Filters
+      </a>
+    {% endif %}
+    <button type="submit" class="btn-paper btn-paper-solid" style="padding: 0.4rem 1.25rem;">
+      Apply Filters &rarr;
+    </button>
+  </div>
+</form>
+
+<!-- Results Count Summary -->
+<div style="margin-bottom: 1.25rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--paper-ink-muted);">
+  Showing <strong>{{ submissions|length }}</strong> of <strong>{{ total_items }}</strong> verified contributions
+</div>
+
+<!-- Unified Search: Showcase Projects Matches -->
+{% if matching_projects %}
+  <div class="paper-card" style="border-left: 5px solid var(--cat-idea); margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0;">
+        Matching Hackathon Demonstrations ({{ matching_projects|length }})
+      </h3>
+      <a href="{{ url_for('showcase.home', tag=search_query) }}" style="font-family: var(--font-mono); font-size: 0.82rem; font-weight: 700;">
+        Showcase Arena &rarr;
+      </a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+      {% for mp in matching_projects %}
+        <div style="background: #FFFFFF; border: 1.5px solid var(--paper-ink); box-shadow: 2px 2px 0px var(--paper-ink); padding: 1rem;">
+          <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--brand-maroon); font-weight: 700; text-transform: uppercase;">
+            {{ mp.event.name }} &bull; {{ mp.track }}
+          </div>
+          <h4 style="font-size: 1.05rem; font-weight: 700; margin: 0.3rem 0;">
+            <a href="{{ url_for('showcase.detail', project_id=mp.id) }}" style="text-decoration: none; color: var(--paper-ink);">{{ mp.title }}</a>
+          </h4>
+          <p style="font-size: 0.85rem; color: var(--paper-ink-body); margin-bottom: 0.5rem;">{{ mp.pitch }}</p>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 0.75rem;">
+            <span>By <strong>{{ mp.team_name }}</strong></span>
+            <span class="paper-stamp">{{ mp.demo_mode_label }}</span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+<!-- ========================================================================
+     FEED LISTING
+     ======================================================================== -->
+{% if submissions %}
+  <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+    {% for sub in submissions %}
+      {% set submission = sub %}
+      {% include 'partials/submission_card.html' %}
+    {% endfor %}
+  </div>
+
+  <!-- Pagination Controls -->
+  {% if total_pages > 1 %}
+    <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 2.5rem;">
+      {% if has_prev %}
+        <a href="{{ url_for('submissions.browse', page=page-1, q=search_query, category=category_filter, department=department_filter, sort=sort_by) }}" class="btn-paper btn-paper-outline">
+          &larr; Previous
+        </a>
+      {% endif %}
+
+      <span style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--paper-ink-muted);">
+        Page <strong>{{ page }}</strong> of <strong>{{ total_pages }}</strong>
+      </span>
+
+      {% if has_next %}
+        <a href="{{ url_for('submissions.browse', page=page+1, q=search_query, category=category_filter, department=department_filter, sort=sort_by) }}" class="btn-paper btn-paper-outline">
+          Next &rarr;
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+{% else %}
+  <div class="paper-empty-box">
+    <h3 style="margin: 0; font-size: 1.3rem;">No contributions match your filters.</h3>
+    <p style="color: var(--paper-ink-muted); margin: 0.35rem 0 1.25rem 0;">
+      Try clearing your search query or changing category and department filters.
+    </p>
+    <a href="{{ url_for('submissions.browse') }}" class="btn-paper btn-paper-accent">
+      View All Archive Items
+    </a>
+  </div>
+{% endif %}
+
+{% endblock %}

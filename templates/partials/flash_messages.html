@@ -1,0 +1,59 @@
+<!--
+  templates/partials/flash_messages.html
+  ==============================================================================
+  FLASH MESSAGES
+  Displays temporary alert banners (success, error, warning, info)
+  triggered by Flask's flash() function.
+  ==============================================================================
+-->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-container">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category if category != 'error' else 'danger' }}" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+{# --- ACTIVE ADMINISTRATIVE NOTICES & STUDENT WARNINGS --- #}
+{% if current_user.is_authenticated and active_user_warnings %}
+  <div class="admin-warnings-container" style="margin-bottom: 1.75rem;">
+    {% for w in active_user_warnings %}
+      <div class="paper-card" style="background: #fffdf5; border: 2.5px solid #d97706; box-shadow: 6px 6px 0px #78350f; padding: 1.5rem; position: relative; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 280px;">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+              <span class="paper-stamp" style="background: #dc2626; color: #ffffff; border-color: #000000; font-weight: 800; font-size: 0.75rem;">
+                [OFFICIAL ADMINISTRATIVE NOTICE]
+              </span>
+              <span class="paper-stamp" style="background: #fef3c7; color: #92400e; border-color: #d97706; font-size: 0.75rem;">
+                REASON: {{ w.category }}
+              </span>
+            </div>
+            <h3 style="margin: 0.25rem 0 0.5rem 0; font-size: 1.25rem; font-weight: 800; color: #78350f;">
+              Notice Concerning Your Activity / Submissions
+            </h3>
+            <p style="margin: 0 0 0.85rem 0; color: #2d2b28; font-size: 0.95rem; line-height: 1.55; white-space: pre-line;">
+              {{ w.message }}
+            </p>
+            <div style="font-family: var(--font-mono); font-size: 0.78rem; color: #92400e;">
+              Issued by Campus Moderation &bull; {{ w.created_at.strftime('%d %b %Y at %H:%M UTC') }}
+            </div>
+          </div>
+          <div>
+            <form method="POST" action="{{ url_for('submissions.acknowledge_warning', warning_id=w.id) }}" style="margin: 0;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn-paper" style="background: #f59e0b; color: #181716; border: 2px solid #181716; box-shadow: 3px 3px 0px #181716; font-weight: 800; font-size: 0.85rem; padding: 0.5rem 1rem; cursor: pointer;">
+                I Acknowledge This Notice &check;
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+

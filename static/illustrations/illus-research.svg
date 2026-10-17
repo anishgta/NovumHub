@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 380" fill="none">
+  <defs>
+    <!-- Soft Organic Pastel Blob Gradient for Research -->
+    <linearGradient id="blobResearch" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E0F2FE" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#EDE9FE" stop-opacity="0.6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Dual overlapping organic background blobs (matches reference B2B backdrop) -->
+  <path d="M120,80 C60,40 30,140 50,220 C70,300 140,340 220,330 C300,320 370,300 390,210 C410,120 360,50 280,40 C200,30 180,120 120,80 Z" 
+        fill="url(#blobResearch)"/>
+  
+  <ellipse cx="140" cy="200" rx="60" ry="70" fill="#DBEAFE" opacity="0.6"/>
+  <ellipse cx="320" cy="180" rx="75" ry="85" fill="#F3E8FF" opacity="0.5"/>
+
+  <!-- Background Research Elements: Floating Chart & Laboratory Glassware -->
+  <g transform="translate(70, 75)">
+    <circle cx="0" cy="0" r="16" fill="#ffffff" stroke="#4D7CFF" stroke-width="1.8"/>
+    <!-- Flask icon -->
+    <path d="M-3 -8 L3 -8 M0 -8 L0 -1 L-6 8 C-7 10, -5 12, -3 12 L3 12 C5 12, 7 10, 6 8 L0 -1" stroke="#4D7CFF" stroke-width="1.5" fill="none"/>
+  </g>
+
+  <g transform="translate(370, 80)">
+    <circle cx="0" cy="0" r="16" fill="#ffffff" stroke="#F472B6" stroke-width="1.8"/>
+    <!-- Chart curve icon -->
+    <path d="M-8 6 L-3 1 L2 4 L8 -4" stroke="#F472B6" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="8" cy="-4" r="2" fill="#F472B6"/>
+  </g>
+
+  <!-- Two Researchers Meeting & Shaking Hands (Dual Line-Art Style from Reference) -->
+  <g id="researchers">
+    <!-- LEFT RESEARCHER (Female student engineer/scientist) -->
+    <g transform="translate(50, 0)">
+      <!-- Head & Ponytail -->
+      <ellipse cx="110" cy="140" rx="14" ry="16" stroke="#090B2A" stroke-width="2.5" fill="#ffffff"/>
+      <path d="M100 135 C 95 125, 110 120, 118 126 C 122 130, 122 140, 115 142" stroke="#4D7CFF" stroke-width="2.5" fill="none"/>
+      <!-- Ponytail ribbon -->
+      <path d="M96 135 C 85 138, 80 150, 85 160" stroke="#4D7CFF" stroke-width="2.5" stroke-linecap="round"/>
+
+      <!-- Jacket / Lab coat outline -->
+      <path d="M96 158 C 85 180, 80 230, 90 270 C 110 275, 140 270, 150 250 C 145 220, 140 180, 126 158 Z" 
+            stroke="#4D7CFF" stroke-width="2.5" fill="#ffffff" fill-opacity="0.85"/>
+      <!-- Lapel -->
+      <path d="M106 158 L 115 190 L 122 158" stroke="#8B5CF6" stroke-width="2"/>
+
+      <!-- Left Arm (Reaching forward to shake hands) -->
+      <path d="M125 180 C 140 190, 165 200, 185 195" stroke="#090B2A" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- RIGHT RESEARCHER (Male student faculty/peer collaborator) -->
+    <g transform="translate(40, 0)">
+      <!-- Head & Short Hair -->
+      <ellipse cx="270" cy="130" rx="15" ry="17" stroke="#090B2A" stroke-width="2.5" fill="#ffffff"/>
+      <!-- Modern Hair Cut -->
+      <path d="M256 122 C 258 112, 275 110, 282 118 C 286 122, 285 130, 280 132" stroke="#F472B6" stroke-width="2.5" fill="none"/>
+      
+      <!-- Blazer / Tech suit outline -->
+      <path d="M255 150 C 240 170, 235 220, 245 265 C 265 270, 305 270, 315 250 C 315 210, 305 170, 288 150 Z" 
+            stroke="#F472B6" stroke-width="2.5" fill="#ffffff" fill-opacity="0.85"/>
+      <!-- Tie / Collar -->
+      <path d="M266 150 L 272 185 L 278 150" stroke="#F472B6" stroke-width="2"/>
+      <line x1="272" y1="185" x2="272" y2="215" stroke="#090B2A" stroke-width="2"/>
+
+      <!-- Right Arm (Reaching forward to shake hands) -->
+      <path d="M255 175 C 235 185, 215 195, 195 195" stroke="#090B2A" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- CLASPED HANDSHAKE (Center of collaboration & discovery) -->
+    <g transform="translate(225, 195)">
+      <!-- Interlocked fingers -->
+      <path d="M-15 0 C-10 -5, 0 -5, 8 -2 C12 1, 12 7, 6 10 C0 13, -10 12, -15 8 Z" 
+            fill="#ffffff" stroke="#090B2A" stroke-width="2.5" stroke-linejoin="round"/>
+      <!-- Sparkles of verified innovation -->
+      <path d="M-2 -12 L0 -7 L2 -12 M-2 20 L0 15 L2 20" stroke="#F472B6" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="-1" cy="-16" r="1.5" fill="#F472B6"/>
+      <circle cx="-1" cy="24" r="1.5" fill="#4D7CFF"/>
+    </g>
+  </g>
+
+  <!-- Floating verified peer-review document -->
+  <g transform="translate(200, 260)">
+    <rect x="0" y="0" width="70" height="50" rx="5" fill="#ffffff" stroke="#4D7CFF" stroke-width="2"/>
+    <line x1="12" y1="14" x2="45" y2="14" stroke="#4D7CFF" stroke-width="2" stroke-linecap="round"/>
+    <line x1="12" y1="24" x2="55" y2="24" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round"/>
+    <line x1="12" y1="34" x2="35" y2="34" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round"/>
+    <!-- Stamp of verification -->
+    <circle cx="52" cy="34" r="7" fill="#FDF2F8" stroke="#F472B6" stroke-width="1.5"/>
+    <path d="M49 34 L51 36 L55 32" stroke="#F472B6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

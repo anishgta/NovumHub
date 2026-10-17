@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}My Dashboard - {{ config_data.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1040px; margin: 1rem auto;">
+  
+  <!-- Profile & Overview Banner -->
+  <div class="paper-card" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+        <span class="paper-stamp stamp-accent">[STUDENT DOSSIER]</span>
+        <span class="paper-stamp">[AIT PUNE]</span>
+      </div>
+      <h1 style="margin: 0.2rem 0; font-size: 2rem; font-weight: 800;">
+        {{ current_user.name }}
+      </h1>
+      <p style="color: var(--paper-ink-muted); margin: 0; font-family: var(--font-mono); font-size: 0.85rem;">
+        {{ current_user.email }} &bull; {{ current_user.department or 'General Engineering' }} &bull; Year: {{ current_user.year or 'N/A' }}
+        {% if current_user.display_registration_no %} &bull; Reg No: {{ current_user.display_registration_no }}{% endif %}
+      </p>
+    </div>
+    <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+      <a href="{{ url_for('auth.profile') }}" class="btn-paper" style="background: var(--paper-sheet-warm); font-size: 0.85rem;">
+        &#9881; Edit Profile & Password
+      </a>
+      <a href="{{ url_for('submissions.submit') }}" class="btn-paper btn-paper-accent">
+        + New Contribution
+      </a>
+    </div>
+  </div>
+
+  <div class="activity-two-col-grid" style="align-items: start;">
+    
+    <!-- Left Column: My Submissions List -->
+    <div>
+      <article class="paper-card" style="padding: 1.5rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--paper-border); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+          <h3 style="margin: 0; font-size: 1.3rem; font-weight: 800;">My Submissions ({{ my_submissions|length }})</h3>
+          <span class="paper-stamp-mini">[FILED LEDGER]</span>
+        </div>
+
+        {% if my_submissions %}
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for sub in my_submissions %}
+              <div class="submission-paper-item" style="box-shadow: 2px 2px 0px var(--paper-ink);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                  <span class="paper-stamp badge-{{ sub.category }}">
+                    {{ config_data.CATEGORIES.get(sub.category, {}).get('name') }}
+                  </span>
+                  {% set status_val = sub.status %}
+                  {% include 'partials/status_badge.html' %}
+                </div>
+
+                <h4 style="margin: 0.3rem 0; font-size: 1.15rem; font-weight: 700;">
+                  <a href="{{ url_for('submissions.detail', submission_id=sub.id) }}">
+                    {{ sub.title }}
+                  </a>
+                </h4>
+
+                <p style="color: var(--paper-ink-muted); font-size: 0.82rem; margin-bottom: 0.8rem; font-family: var(--font-mono); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                  <span>Filed {{ sub.created_at.strftime('%d %b %Y') }}</span> &bull; 
+                  <span>&uarr; {{ sub.upvote_count }} Upvotes</span> &bull; 
+                  <span>{{ sub.comments|length }} Comments</span>
+                </p>
+
+                <!-- Actions row -->
+                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; border-top: 1px dashed var(--paper-crease); padding-top: 0.65rem;">
+                  <a href="{{ url_for('submissions.detail', submission_id=sub.id) }}" class="btn-paper-mini">
+                    View Dossier
+                  </a>
+
+                  {% if sub.status in ('Submitted', 'Needs Changes') %}
+                    <a href="{{ url_for('submissions.edit', submission_id=sub.id) }}" class="btn-paper-mini">
+                      Edit
+                    </a>
+                  {% endif %}
+
+                  {% if sub.status == 'Submitted' %}
+                    <form method="POST" action="{{ url_for('submissions.withdraw', submission_id=sub.id) }}" style="margin: 0;" onsubmit="return confirm('Withdraw this submission?');">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn-paper-mini" style="border-color: #dc2626; color: #dc2626; box-shadow: 1.5px 1.5px 0px #dc2626;">
+                        Withdraw
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="paper-empty-box">
+            <p style="margin: 0; color: var(--paper-ink-muted);">You have not filed any contributions yet in this cycle.</p>
+            <a href="{{ url_for('submissions.submit') }}" class="btn-paper btn-paper-accent">
+              + File Your First Contribution
+            </a>
+          </div>
+        {% endif %}
+      </article>
+    </div>
+
+    <!-- Right Column: In-Site Notifications -->
+    <aside>
+      <article class="paper-card" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--paper-border); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+          <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800;">
+            Notifications
+          </h4>
+          {% if notifications %}
+            <form method="POST" action="{{ url_for('submissions.mark_notifications_read') }}" style="margin: 0;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" style="background: none; border: none !important; font-size: 0.75rem; color: var(--brand-maroon); padding: 0; text-decoration: underline; cursor: pointer; font-family: var(--font-mono);">
+                Mark read
+              </button>
+            </form>
+          {% endif %}
+        </div>
+
+        {% if notifications %}
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            {% for n in notifications %}
+              <div style="padding: 0.85rem; border: 1.5px solid var(--paper-ink); box-shadow: 2px 2px 0px var(--paper-ink); font-size: 0.85rem; {% if not n.is_read %}background: #fffbeb; border-left: 4px solid var(--brand-maroon);{% else %}background: #ffffff; border-left: 4px solid var(--paper-ink-muted);{% endif %}">
+                <p style="margin: 0 0 0.35rem 0; font-weight: {% if not n.is_read %}700{% else %}500{% endif %};">
+                  {{ n.message }}
+                </p>
+                <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.72rem; color: var(--paper-ink-muted);">
+                  <span>{{ n.created_at.strftime('%d %b, %I:%M %p') }}</span>
+                  {% if n.link %}
+                    <a href="{{ n.link }}" style="color: var(--brand-maroon); font-weight: 700;">View &rarr;</a>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p style="color: var(--paper-ink-muted); font-size: 0.88rem; margin: 0; line-height: 1.5;">
+            No notifications yet. You will receive real-time alerts whenever a reviewer triages or comments on your research.
+          </p>
+        {% endif %}
+      </article>
+    </aside>
+
+  </div>
+</div>
+{% endblock %}

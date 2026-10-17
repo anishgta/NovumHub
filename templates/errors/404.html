@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Page Not Found (404) - {{ config_data.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 520px; margin: 3rem auto; text-align: center;">
+  <article class="paper-card">
+    <span class="paper-stamp" style="background: #fef3c7; color: #92400e; border-color: #92400e; margin-bottom: 0.8rem;">
+      [ERROR CODE // 404 NOT FOUND]
+    </span>
+    <h1 style="font-size: 3.5rem; color: var(--brand-maroon); margin-bottom: 0.3rem; font-family: var(--font-mono);">404</h1>
+    <h2 style="margin-bottom: 0.5rem; font-weight: 800;">Record Not Found</h2>
+    <p style="color: var(--paper-ink-muted); margin-bottom: 1.5rem; line-height: 1.6;">
+      The page, artifact, or submission you are searching for is not indexed in the campus archive.
+    </p>
+    <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+      <a href="{{ url_for('submissions.browse') }}" class="btn-paper btn-paper-accent">
+        Browse Archive
+      </a>
+      <a href="{{ url_for('main.home') }}" class="btn-paper btn-paper-outline">
+        &larr; Return Home
+      </a>
+    </div>
+  </article>
+</div>
+{% endblock %}

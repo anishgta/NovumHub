@@ -1,0 +1,23 @@
+{#
+  templates/partials/status_badge.html
+  ==============================================================================
+  STATUS BADGE
+  Renders a colored pill badge for a given submission status with SVG icon placeholders.
+  Expects variable: status_val
+  ==============================================================================
+#}
+{% if status_val == "Submitted" %}
+  <span class="badge badge-status-submitted"><img src="{{ url_for('static', filename='icons/icon-clock.svg') }}" class="site-icon" alt=""> Submitted</span>
+{% elif status_val == "Under Review" %}
+  <span class="badge badge-status-under-review"><img src="{{ url_for('static', filename='icons/icon-search.svg') }}" class="site-icon" alt=""> Under Review</span>
+{% elif status_val == "Accepted" %}
+  <span class="badge badge-status-accepted"><img src="{{ url_for('static', filename='icons/icon-check.svg') }}" class="site-icon" alt=""> Accepted</span>
+{% elif status_val == "Needs Changes" %}
+  <span class="badge badge-status-needs-changes"><img src="{{ url_for('static', filename='icons/icon-alert.svg') }}" class="site-icon" alt=""> Needs Changes</span>
+{% elif status_val == "Rejected" %}
+  <span class="badge badge-status-rejected"><img src="{{ url_for('static', filename='icons/icon-cross.svg') }}" class="site-icon" alt=""> Rejected</span>
+{% elif status_val == "Implemented" %}
+  <span class="badge badge-status-implemented"><img src="{{ url_for('static', filename='icons/icon-trophy.svg') }}" class="site-icon" alt=""> Implemented</span>
+{% else %}
+  <span class="badge">{{ status_val }}</span>
+{% endif %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Log In - {{ config_data.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 480px; margin: 2rem auto;">
+  <article class="paper-card">
+    <header style="margin-bottom: 1.5rem; text-align: center;">
+      <span class="paper-stamp stamp-accent" style="margin-bottom: 0.6rem;">[AUTH // ACCESS CHECK]</span>
+      <h2 style="margin: 0.3rem 0; font-weight: 800;">Welcome Back</h2>
+      <p style="color: var(--paper-ink-muted); font-size: 0.95rem; margin: 0;">
+        Log in to submit ideas, track your research, and participate in peer reviews.
+      </p>
+    </header>
+
+    <!-- Login Form with CSRF Protection -->
+    <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
+      {{ form.hidden_tag() }}
+
+      <!-- Email Field -->
+      <div style="margin-bottom: 1rem;">
+        <label for="email">
+          {{ form.email.label }}
+        </label>
+        {{ form.email(placeholder="student@aitpune.edu.in", id="email", required=True) }}
+        {% for error in form.email.errors %}
+          <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700;">{{ error }}</small>
+        {% endfor %}
+      </div>
+
+      <!-- Password Field -->
+      <div style="margin-bottom: 1rem;">
+        <label for="password">
+          {{ form.password.label }}
+        </label>
+        {{ form.password(placeholder="••••••••", id="password", required=True) }}
+        {% for error in form.password.errors %}
+          <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700;">{{ error }}</small>
+        {% endfor %}
+      </div>
+
+      <!-- Remember Me Checkbox -->
+      <label for="remember_me" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; cursor: pointer;">
+        {{ form.remember_me(id="remember_me") }}
+        <span style="font-weight: 600;">{{ form.remember_me.label.text }}</span>
+      </label>
+
+      <!-- Submit Button -->
+      {{ form.submit(class="btn-paper btn-paper-accent", style="width: 100%;") }}
+    </form>
+
+    <footer style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; border-top: 1px dashed var(--paper-crease); padding-top: 1rem;">
+      Don't have an account yet? 
+      <a href="{{ url_for('auth.register') }}">Create an account &rarr;</a>
+    </footer>
+  </article>
+</div>
+{% endblock %}

@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 460" fill="none">
+  <defs>
+    <!-- Celestial Moon Horizon Glow -->
+    <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#DDD6FE" stop-opacity="0.6"/>
+      <stop offset="80%" stop-color="#8B5CF6" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#090B2A" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Mountain Ridge Gradient (Foreground warm reddish violet from reference) -->
+    <linearGradient id="ridgeGradFore" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9F1239"/>
+      <stop offset="40%" stop-color="#881337"/>
+      <stop offset="100%" stop-color="#4C0519"/>
+    </linearGradient>
+
+    <!-- Mountain Ridge Gradient (Midground purple) -->
+    <linearGradient id="ridgeGradMid" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3B1358"/>
+      <stop offset="100%" stop-color="#1E0A30"/>
+    </linearGradient>
+
+    <!-- Mountain Ridge Gradient (Distant blue/purple) -->
+    <linearGradient id="ridgeGradBack" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#241459"/>
+      <stop offset="100%" stop-color="#0C0A26"/>
+    </linearGradient>
+
+    <!-- Rocket Metallic Gradient -->
+    <linearGradient id="rocketBody" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#CBD5E1"/>
+      <stop offset="45%" stop-color="#FFFFFF"/>
+      <stop offset="80%" stop-color="#94A3B8"/>
+      <stop offset="100%" stop-color="#64748B"/>
+    </linearGradient>
+
+    <!-- Rocket Fin Gradient -->
+    <linearGradient id="rocketFin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1E293B"/>
+    </linearGradient>
+
+    <!-- Phone Screen Gradient -->
+    <linearGradient id="screenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+
+    <!-- Hand Skin Tone / Shading in Cosmic Night -->
+    <linearGradient id="handSkin" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2D1B4E"/>
+      <stop offset="50%" stop-color="#58357A"/>
+      <stop offset="85%" stop-color="#9D6FA9"/>
+      <stop offset="100%" stop-color="#C4B5FD"/>
+    </linearGradient>
+  </defs>
+
+  <!-- DISTANT HORIZON GLOW & MOON -->
+  <ellipse cx="380" cy="270" rx="140" ry="140" fill="url(#moonGlow)"/>
+  <circle cx="380" cy="270" r="85" fill="#FAF5FF" opacity="0.9"/>
+  <!-- Subtle Moon Craters -->
+  <ellipse cx="350" cy="245" rx="14" ry="10" fill="#EDE9FE" opacity="0.6"/>
+  <ellipse cx="405" cy="260" rx="20" ry="15" fill="#EDE9FE" opacity="0.5"/>
+  <circle cx="370" cy="290" r="8" fill="#EDE9FE" opacity="0.5"/>
+
+  <!-- LAYERED MOUNTAIN RIDGES -->
+  <!-- Distant Blue Ridge -->
+  <path d="M0 320 C 80 290, 180 310, 280 280 C 370 250, 480 300, 640 260 L 640 460 L 0 460 Z" fill="url(#ridgeGradBack)"/>
+  
+  <!-- Midground Violet Ridge -->
+  <path d="M0 370 C 120 330, 240 370, 360 320 C 460 280, 560 330, 640 310 L 640 460 L 0 460 Z" fill="url(#ridgeGradMid)"/>
+
+  <!-- Foreground Terraced Reddish-Violet Ridge (Right side around rocket launchpad) -->
+  <path d="M280 460 C 320 400, 390 380, 460 380 C 530 380, 580 360, 640 380 L 640 460 Z" fill="url(#ridgeGradFore)"/>
+  <!-- Craggy ridge highlights -->
+  <path d="M330 420 L 370 395 L 430 405 L 480 385 L 540 390 L 600 375 L 640 390" stroke="#BE123C" stroke-width="2.5" fill="none" opacity="0.7"/>
+
+  <!-- ROCKET SHIP (Standing tall on right launch terrain) -->
+  <g transform="translate(435, 145)">
+    <!-- Rocket shadow on ground -->
+    <ellipse cx="35" cy="245" rx="35" ry="8" fill="#1C0516" opacity="0.8"/>
+
+    <!-- Left Fin -->
+    <path d="M12 170 C -8 185, -15 220, -18 240 C -10 240, 5 235, 12 215 Z" 
+          fill="url(#rocketFin)" stroke="#0F172A" stroke-width="2"/>
+    <path d="M-18 240 L -8 240" stroke="#F43F5E" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Right Fin -->
+    <path d="M58 170 C 78 185, 85 220, 88 240 C 80 240, 65 235, 58 215 Z" 
+          fill="url(#rocketFin)" stroke="#0F172A" stroke-width="2"/>
+    <path d="M88 240 L 78 240" stroke="#F43F5E" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Center Stabilizing Fin -->
+    <path d="M32 175 L 38 175 L 38 238 L 32 238 Z" fill="#334155" stroke="#0F172A" stroke-width="1.5"/>
+
+    <!-- Main Fuselage / Body -->
+    <path d="M35 0 C 22 45, 10 110, 10 200 C 10 215, 60 215, 60 200 C 60 110, 48 45, 35 0 Z" 
+          fill="url(#rocketBody)" stroke="#0F172A" stroke-width="2.5"/>
+
+    <!-- Cockpit Porthole Window -->
+    <circle cx="35" cy="65" r="14" fill="#0F172A" stroke="#CBD5E1" stroke-width="3"/>
+    <circle cx="35" cy="65" r="10" fill="#4D7CFF"/>
+    <circle cx="32" cy="62" r="3" fill="#ffffff"/>
+
+    <!-- Fuselage Rings / Tech panel stripes -->
+    <path d="M11 120 C 22 125, 48 125, 59 120" stroke="#0F172A" stroke-width="2.5" fill="none"/>
+    <path d="M10 160 C 22 165, 48 165, 60 160" stroke="#F43F5E" stroke-width="3.5" fill="none"/>
+    
+    <!-- AIT Star Emblem on Rocket -->
+    <circle cx="35" cy="140" r="6" fill="#8B5CF6"/>
+    <polygon points="35,135 36.5,138.5 40,140 36.5,141.5 35,145 33.5,141.5 30,140 33.5,138.5" fill="#ffffff"/>
+
+    <!-- Rocket Engine Nozzle & Launch Light -->
+    <path d="M22 215 L 48 215 L 43 230 L 27 230 Z" fill="#1E293B"/>
+    <ellipse cx="35" cy="235" rx="16" ry="6" fill="#FB7185" filter="drop-shadow(0px 0px 8px #F43F5E)"/>
+  </g>
+
+  <!-- FOREGROUND HAND HOLDING SMARTPHONE (Matches Reference Left Composition) -->
+  <g transform="translate(140, 210)">
+    <!-- Smartphone Chassis -->
+    <g transform="rotate(-6 100 130)">
+      <!-- Phone Outer Shadow -->
+      <rect x="18" y="8" width="134" height="234" rx="26" fill="#000000" opacity="0.6"/>
+      
+      <!-- Phone Bezel -->
+      <rect x="20" y="10" width="130" height="230" rx="24" fill="#020617" stroke="#475569" stroke-width="2.5"/>
+      
+      <!-- Phone Screen Display (Hackrec Portal) -->
+      <rect x="26" y="18" width="118" height="214" rx="18" fill="url(#screenGrad)"/>
+      
+      <!-- Screen Notch / Speaker -->
+      <rect x="65" y="24" width="40" height="5" rx="2.5" fill="#334155"/>
+
+      <!-- App Header inside phone: Logo & Hackrec title -->
+      <g transform="translate(38, 45)">
+        <polygon points="10,0 12,6 18,8 12,10 10,16 8,10 2,8 8,6" fill="#A855F7"/>
+        <text x="24" y="12" font-family="Plus Jakarta Sans, sans-serif" font-size="12" font-weight="800" fill="#ffffff">hackrec</text>
+        <circle cx="76" cy="10" r="1.5" fill="#4D7CFF"/>
+      </g>
+
+      <!-- Screen Title: "Get started by sharing your idea" -->
+      <text x="40" y="90" font-family="Plus Jakarta Sans, sans-serif" font-size="15" font-weight="800" fill="#ffffff">Get started</text>
+      <text x="40" y="108" font-family="Plus Jakarta Sans, sans-serif" font-size="9" font-weight="500" fill="#94A3B8">by connecting with</text>
+      <text x="40" y="120" font-family="Plus Jakarta Sans, sans-serif" font-size="9" font-weight="500" fill="#94A3B8">our campus triage.</text>
+
+      <!-- Big Radiant Pink/Red CTA Button on screen (Matches Reference) -->
+      <g transform="translate(85, 160)">
+        <circle cx="0" cy="0" r="28" fill="#E11D48" filter="drop-shadow(0px 0px 10px rgba(225, 29, 72, 0.7))"/>
+        <circle cx="0" cy="0" r="24" fill="#F43F5E"/>
+        <text x="0" y="3" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="8.5" font-weight="700" fill="#ffffff">Submit</text>
+      </g>
+    </g>
+
+    <!-- Cosmic Shaded Hand Gripping Phone (From Bottom Left) -->
+    <!-- Palm & Wrist Base -->
+    <path d="M-40 240 C -10 200, 20 180, 50 160 C 70 190, 80 230, 90 260 L -40 260 Z" 
+          fill="url(#handSkin)" stroke="#1E1B4B" stroke-width="2"/>
+
+    <!-- Thumb resting over left bezel -->
+    <path d="M30 140 C 35 125, 45 120, 55 130 C 65 140, 60 165, 45 175 C 35 180, 25 160, 30 140 Z" 
+          fill="url(#handSkin)" stroke="#1E1B4B" stroke-width="2.5"/>
+    <path d="M48 132 C 52 135, 52 142, 48 145" stroke="#C4B5FD" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Index Finger curling around right edge -->
+    <path d="M150 115 C 165 115, 172 125, 168 135 C 162 145, 145 145, 138 135" 
+          fill="url(#handSkin)" stroke="#1E1B4B" stroke-width="2.5"/>
+
+    <!-- Middle Finger curling around right edge -->
+    <path d="M148 145 C 164 145, 170 155, 166 165 C 160 175, 142 175, 136 165" 
+          fill="url(#handSkin)" stroke="#1E1B4B" stroke-width="2.5"/>
+
+    <!-- Ring Finger curling around right edge -->
+    <path d="M145 175 C 160 175, 166 185, 162 195 C 156 205, 140 205, 134 195" 
+          fill="url(#handSkin)" stroke="#1E1B4B" stroke-width="2.5"/>
+  </g>
+</svg>

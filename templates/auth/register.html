@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - {{ config_data.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 580px; margin: 2rem auto;">
+  <article class="paper-card">
+    <header style="margin-bottom: 1.5rem; text-align: center;">
+      <span class="paper-stamp stamp-accent" style="margin-bottom: 0.6rem;">[NEW STUDENT // CLEARANCE REGISTER]</span>
+      <h2 style="margin: 0.3rem 0; font-weight: 800;">Join {{ config_data.SITE_NAME }}</h2>
+      <p style="color: var(--paper-ink-muted); font-size: 0.95rem; margin: 0;">
+        Register your official student profile for {{ config_data.COLLEGE_NAME }}.
+      </p>
+    </header>
+
+    <!-- Registration Form -->
+    <form method="POST" action="{{ url_for('auth.register') }}">
+      {{ form.hidden_tag() }}
+
+      <!-- Full Name -->
+      <div style="margin-bottom: 1rem;">
+        <label for="name">{{ form.name.label }}</label>
+        {{ form.name(placeholder="e.g. Rohan Sharma", id="name", required=True) }}
+        {% for error in form.name.errors %}
+          <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700;">{{ error }}</small>
+        {% endfor %}
+      </div>
+
+      <!-- Email -->
+      <div style="margin-bottom: 1rem;">
+        <label for="email">{{ form.email.label }}</label>
+        {{ form.email(placeholder="student@aitpune.edu.in", id="email", required=True) }}
+        {% if config_data.ALLOWED_EMAIL_DOMAIN %}
+          <small style="color: var(--paper-ink-muted); font-family: var(--font-mono); font-size: 0.75rem;">Must be an @{{ config_data.ALLOWED_EMAIL_DOMAIN }} institutional address.</small>
+        {% endif %}
+        {% for error in form.email.errors %}
+          <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700; display: block;">{{ error }}</small>
+        {% endfor %}
+      </div>
+
+      <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+        <!-- Department -->
+        <div>
+          <label for="department">{{ form.department.label }}</label>
+          {{ form.department(id="department") }}
+          {% for error in form.department.errors %}
+            <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700;">{{ error }}</small>
+          {% endfor %}
+        </div>
+
+        <!-- Academic Year -->
+        <div>
+          <label for="year">{{ form.year.label }}</label>
+          {{ form.year(id="year") }}
+          {% for error in form.year.errors %}
+            <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700;">{{ error }}</small>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Registration Number (6-digit) -->
+      <div style="margin-bottom: 1rem;">
+        <label for="registration_no">{{ form.registration_no.label }}</label>
+        {{ form.registration_no(placeholder="e.g. 231045", id="registration_no", maxlength="6", required=True) }}
+        <small style="color: var(--paper-ink-muted); font-family: var(--font-mono); font-size: 0.75rem; display: block; margin-top: 0.2rem;">
+          * Exactly 6 digits. Private: Only visible to administrators and yourself.
+        </small>
+        {% for error in form.registration_no.errors %}
+          <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700; display: block;">{{ error }}</small>
+        {% endfor %}
+      </div>
+
+      <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        <!-- Password -->
+        <div>
+          <label for="password">{{ form.password.label }}</label>
+          {{ form.password(placeholder="Min 6 characters", id="password", required=True) }}
+          {% for error in form.password.errors %}
+            <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700;">{{ error }}</small>
+          {% endfor %}
+        </div>
+
+        <!-- Confirm Password -->
+        <div>
+          <label for="confirm_password">{{ form.confirm_password.label }}</label>
+          {{ form.confirm_password(placeholder="Repeat password", id="confirm_password", required=True) }}
+          {% for error in form.confirm_password.errors %}
+            <small style="color: #dc2626; font-family: var(--font-mono); font-weight: 700;">{{ error }}</small>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      {{ form.submit(class="btn-paper btn-paper-accent", style="width: 100%;") }}
+    </form>
+
+    <footer style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; border-top: 1px dashed var(--paper-crease); padding-top: 1rem;">
+      Already have an account? 
+      <a href="{{ url_for('auth.login') }}">Log in here &rarr;</a>
+    </footer>
+  </article>
+</div>
+{% endblock %}

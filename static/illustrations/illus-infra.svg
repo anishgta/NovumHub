@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 380" fill="none">
+  <defs>
+    <!-- Soft Mint / Cyan Organic Blob Gradient -->
+    <linearGradient id="blobInfra" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E0F2FE" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#ECFDF5" stop-opacity="0.6"/>
+    </linearGradient>
+    <!-- Crescent Moon Gradient -->
+    <linearGradient id="moonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E0E7FF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Organic amorphous background shape (matches reference backdrop) -->
+  <path d="M120,70 C50,40 30,150 40,230 C50,310 130,350 220,340 C310,330 380,300 400,210 C420,120 370,40 280,30 C200,20 180,100 120,70 Z" 
+        fill="url(#blobInfra)"/>
+
+  <!-- Soft floating clouds -->
+  <path d="M50 250 C 40 240, 50 220, 70 225 C 80 215, 105 215, 115 228 C 125 220, 140 225, 145 235 C 150 245, 145 255, 130 260 L 55 260 Z" 
+        fill="#ffffff" stroke="#4D7CFF" stroke-width="1.8" stroke-linejoin="round" opacity="0.85"/>
+  <path d="M330 80 C 320 70, 330 50, 350 55 C 360 45, 385 45, 395 58 C 405 50, 420 55, 425 65 C 430 75, 425 85, 410 90 L 335 90 Z" 
+        fill="#ffffff" stroke="#8B5CF6" stroke-width="1.5" stroke-linejoin="round" opacity="0.75"/>
+
+  <!-- LUMINOUS CRESCENT MOON (Student rests on the curve) -->
+  <path d="M190 70 C 120 110, 95 200, 140 280 C 180 340, 270 345, 310 305 C 235 325, 155 275, 150 190 C 145 130, 185 85, 190 70 Z" 
+        fill="url(#moonGrad)" stroke="#4D7CFF" stroke-width="2.8" stroke-linejoin="round"/>
+
+  <!-- Adorable Cat / Mascot asleep on the moon's upper curve -->
+  <g transform="translate(160, 110)">
+    <!-- Cat curled body -->
+    <ellipse cx="0" cy="0" rx="14" ry="11" fill="#ffffff" stroke="#090B2A" stroke-width="2"/>
+    <!-- Head & Ears -->
+    <circle cx="10" cy="-4" r="7" fill="#ffffff" stroke="#090B2A" stroke-width="1.8"/>
+    <polygon points="6,-10 9,-14 11,-9" fill="#F472B6" stroke="#090B2A" stroke-width="1.5"/>
+    <polygon points="12,-9 15,-13 16,-8" fill="#F472B6" stroke="#090B2A" stroke-width="1.5"/>
+    <!-- Curled tail -->
+    <path d="M-12 2 C -18 2, -20 -4, -16 -8" stroke="#090B2A" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <!-- Sleeping Zzz -->
+    <text x="18" y="-12" font-family="Plus Jakarta Sans, sans-serif" font-size="10" font-weight="700" fill="#8B5CF6">z</text>
+    <text x="25" y="-18" font-family="Plus Jakarta Sans, sans-serif" font-size="8" font-weight="700" fill="#F472B6">z</text>
+  </g>
+
+  <!-- STUDENT SEATED ON MOON WITH LAPTOP (Matches Reference Freelance Illustration) -->
+  <g id="moonStudent">
+    <!-- Head & Hair -->
+    <ellipse cx="205" cy="180" rx="13" ry="15" stroke="#090B2A" stroke-width="2.5" fill="#ffffff"/>
+    <path d="M195 174 C 190 162, 210 158, 216 166 C 220 170, 218 180, 212 182" stroke="#4D7CFF" stroke-width="2.5" fill="none"/>
+    
+    <!-- Torso sitting -->
+    <path d="M200 196 C 190 215, 185 240, 195 260 C 215 265, 235 255, 240 240 C 235 220, 230 205, 218 196 Z" 
+          stroke="#4D7CFF" stroke-width="2.5" fill="#ffffff" fill-opacity="0.85"/>
+    
+    <!-- Left Arm & Hands on Laptop Keyboard -->
+    <path d="M205 215 C 215 225, 230 228, 245 224" stroke="#090B2A" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Laptop open on lap -->
+    <g transform="translate(230, 210)">
+      <!-- Screen -->
+      <line x1="0" y1="18" x2="16" y2="2" stroke="#090B2A" stroke-width="2.5" stroke-linecap="round"/>
+      <rect x="0" y="2" width="18" height="18" rx="2" fill="#EEF2FF" stroke="#4D7CFF" stroke-width="1.8" transform="skewX(-15)"/>
+      <circle cx="8" cy="10" r="2.5" fill="#F472B6"/>
+      <!-- Base keyboard -->
+      <line x1="-3" y1="20" x2="22" y2="20" stroke="#090B2A" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <!-- Seated Legs dangling gracefully from moon curve -->
+    <!-- Left Leg -->
+    <path d="M200 260 C 210 280, 215 305, 218 325" stroke="#090B2A" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M218 325 L 228 328 C 232 330, 228 335, 222 334 L 214 330 Z" stroke="#090B2A" stroke-width="2" fill="#F472B6"/>
+
+    <!-- Right Leg -->
+    <path d="M215 258 C 230 275, 240 295, 245 315" stroke="#4D7CFF" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M245 315 L 255 318 C 258 320, 255 325, 249 324 L 241 320 Z" stroke="#090B2A" stroke-width="2" fill="#8B5CF6"/>
+  </g>
+
+  <!-- FLOATING CAMPUS INFRASTRUCTURE BUBBLES (WiFi, Heart, Play/Audio, Campus) -->
+  <g transform="translate(285, 140)">
+    <!-- WiFi signal bubble -->
+    <circle cx="0" cy="0" r="16" fill="#ffffff" stroke="#F472B6" stroke-width="2"/>
+    <path d="M-6 3 C-2 -1, 2 -1, 6 3 M-4 6 C-1 4, 1 4, 4 6 M-1 9 L1 9" stroke="#F472B6" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(315, 185)">
+    <!-- Like / Upvote Heart bubble -->
+    <circle cx="0" cy="0" r="14" fill="#ffffff" stroke="#4D7CFF" stroke-width="1.8"/>
+    <path d="M0 -3 C -3 -7, -7 -5, -7 -1 C -7 3, 0 8, 0 8 C 0 8, 7 3, 7 -1 C 7 -5, 3 -7, 0 -3 Z" fill="#4D7CFF"/>
+  </g>
+
+  <g transform="translate(270, 95)">
+    <!-- Multimedia / Lab display bubble -->
+    <rect x="-14" y="-12" width="28" height="24" rx="6" fill="#ffffff" stroke="#8B5CF6" stroke-width="1.8"/>
+    <polygon points="-3,-5 5,0 -3,5" fill="#8B5CF6"/>
+  </g>
+</svg>

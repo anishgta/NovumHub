@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Settings & Profile - {{ config_data.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 980px; margin: 1.5rem auto 3.5rem auto;">
+
+  <!-- Breadcrumb & Page Header -->
+  <div style="margin-bottom: 1.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <a href="{{ url_for('submissions.dashboard') }}" class="btn-paper btn-paper-sm" style="background: var(--paper-sheet-warm);">
+        &larr; Back to Dashboard
+      </a>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <span class="paper-stamp stamp-accent">[ACCOUNT LEDGER]</span>
+        <span class="paper-stamp">[SETTINGS & PRIVACY]</span>
+      </div>
+    </div>
+    
+    <h1 style="margin: 0.2rem 0 0.4rem 0; font-size: 2.25rem; font-weight: 800; color: var(--paper-ink);">
+      Account Settings & Dossier
+    </h1>
+    <p style="color: var(--paper-ink-muted); margin: 0; font-size: 0.95rem;">
+      Update your personal credentials, contact details, academic department, and password.
+    </p>
+  </div>
+
+  <!-- Role Status Card (Strictly Read-Only / Institutional Policy) -->
+  <div class="paper-card" style="padding: 1.5rem; background: var(--paper-sheet-warm); border: 2px solid var(--paper-ink); box-shadow: 4px 4px 0px var(--paper-ink); margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+      <div style="flex: 1; min-width: 280px;">
+        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+          <span class="paper-stamp" style="font-weight: 800; text-transform: uppercase;
+            {% if current_user.role == 'admin' %}background: #881337; color: #fff;
+            {% elif current_user.role == 'reviewer' %}background: #6d28d9; color: #fff;
+            {% elif current_user.role == 'judge' %}background: #1d4ed8; color: #fff;
+            {% else %}background: #047857; color: #fff;{% endif %}">
+            ROLE: {{ current_user.role|upper }}
+          </span>
+          <span class="paper-stamp-mini" style="background: #ffffff; color: var(--paper-ink);">
+            USER ID #{{ current_user.id }}
+          </span>
+          {% if current_user.warning_count > 0 %}
+            <span class="paper-stamp-mini" style="background: #fef3c7; color: #92400e; border-color: #d97706;">
+              ⚠️ {{ current_user.warning_count }} WARNING NOTICE{% if current_user.warning_count > 1 %}S{% endif %}
+            </span>
+          {% endif %}
+        </div>
+
+        <h3 style="margin: 0.2rem 0 0.5rem 0; font-size: 1.25rem; font-weight: 800;">
+          System Access Tier & Permissions
+        </h3>
+        <p style="color: var(--paper-ink-body); margin: 0; font-size: 0.88rem; line-height: 1.5; max-width: 680px;">
+          &#128737;&#65039; <strong>Access Policy:</strong> System roles (<em>Student</em>, <em>Reviewer</em>, <em>Judge</em>, <em>Administrator</em>) govern submission triage, evaluation scoring, and moderation privileges. To maintain integrity, account roles are designated and assigned strictly by campus administration and cannot be self-modified.
+        </p>
+      </div>
+
+      <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--paper-ink-muted); text-align: right;">
+        <div>REGISTERED: {{ current_user.created_at.strftime('%d %b %Y') }}</div>
+        <div style="margin-top: 0.2rem;">COLLEGE: {{ config_data.COLLEGE_SHORT_NAME }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.75rem; align-items: start;">
+
+    <!-- SECTION 1: Personal & Academic Details Form -->
+    <article class="paper-card" style="padding: 1.75rem; background: #ffffff;">
+      <div style="border-bottom: 2px solid var(--paper-border); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+        <span class="paper-stamp-mini">[DOSSIER DETAILS]</span>
+        <h3 style="margin: 0.35rem 0 0 0; font-size: 1.35rem; font-weight: 800;">
+          Edit Personal Details
+        </h3>
+      </div>
+
+      <form method="POST" action="{{ url_for('auth.profile') }}">
+        {{ profile_form.hidden_tag() }}
+
+        <!-- Full Name -->
+        <div style="margin-bottom: 1.1rem;">
+          <label for="{{ profile_form.name.id }}" style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem;">
+            Full Name <span style="color: #dc2626;">*</span>
+          </label>
+          {{ profile_form.name(placeholder="e.g. Priya Sharma", style="width: 100%; padding: 0.55rem; border: 1.5px solid var(--paper-ink); font-family: var(--font-sans); font-size: 0.95rem; box-shadow: 2px 2px 0px var(--paper-ink);") }}
+          {% for error in profile_form.name.errors %}
+            <div style="color: #dc2626; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; margin-top: 0.25rem;">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <!-- Email Address -->
+        <div style="margin-bottom: 1.1rem;">
+          <label for="{{ profile_form.email.id }}" style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem;">
+            Email Address <span style="color: #dc2626;">*</span>
+          </label>
+          {{ profile_form.email(placeholder="student@aitpune.edu.in", style="width: 100%; padding: 0.55rem; border: 1.5px solid var(--paper-ink); font-family: var(--font-mono); font-size: 0.9rem; box-shadow: 2px 2px 0px var(--paper-ink);") }}
+          {% for error in profile_form.email.errors %}
+            <div style="color: #dc2626; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; margin-top: 0.25rem;">{{ error }}</div>
+          {% endfor %}
+          <small style="color: var(--paper-ink-muted); font-size: 0.78rem; display: block; margin-top: 0.25rem;">
+            Must match your institutional domain (<code>@{{ config_data.ALLOWED_EMAIL_DOMAIN }}</code>).
+          </small>
+        </div>
+
+        <!-- Department -->
+        <div style="margin-bottom: 1.1rem;">
+          <label for="{{ profile_form.department.id }}" style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem;">
+            Academic Department
+          </label>
+          {{ profile_form.department(style="width: 100%; padding: 0.55rem; border: 1.5px solid var(--paper-ink); font-family: var(--font-sans); font-size: 0.9rem; box-shadow: 2px 2px 0px var(--paper-ink); background: #ffffff;") }}
+          {% for error in profile_form.department.errors %}
+            <div style="color: #dc2626; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; margin-top: 0.25rem;">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <!-- Academic Year -->
+        <div style="margin-bottom: 1.1rem;">
+          <label for="{{ profile_form.year.id }}" style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem;">
+            Academic Year
+          </label>
+          {{ profile_form.year(style="width: 100%; padding: 0.55rem; border: 1.5px solid var(--paper-ink); font-family: var(--font-sans); font-size: 0.9rem; box-shadow: 2px 2px 0px var(--paper-ink); background: #ffffff;") }}
+          {% for error in profile_form.year.errors %}
+            <div style="color: #dc2626; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; margin-top: 0.25rem;">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <!-- Registration Number (6-digit) -->
+        <div style="margin-bottom: 1.5rem;">
+          <label for="{{ profile_form.registration_no.id }}" style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem;">
+            Registration Number (6-digit)
+          </label>
+          {{ profile_form.registration_no(placeholder="e.g. 231045", maxlength="6", style="width: 100%; padding: 0.55rem; border: 1.5px solid var(--paper-ink); font-family: var(--font-mono); font-size: 0.9rem; box-shadow: 2px 2px 0px var(--paper-ink);") }}
+          <small style="color: var(--paper-ink-muted); font-family: var(--font-mono); font-size: 0.75rem; display: block; margin-top: 0.25rem;">
+            * Private: Only visible to you and administrators. Must be exactly 6 digits.
+          </small>
+          {% for error in profile_form.registration_no.errors %}
+            <div style="color: #dc2626; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; margin-top: 0.25rem;">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <!-- Submit Details Button -->
+        {{ profile_form.submit_profile(class="btn-paper btn-paper-accent", style="width: 100%; font-size: 0.95rem; font-weight: 800; padding: 0.65rem;") }}
+      </form>
+    </article>
+
+    <!-- SECTION 2: Change Password Form -->
+    <article class="paper-card" style="padding: 1.75rem; background: #ffffff;">
+      <div style="border-bottom: 2px solid var(--paper-border); padding-bottom: 0.75rem; margin-bottom: 1.25rem;">
+        <span class="paper-stamp-mini">[CREDENTIAL SECURITY]</span>
+        <h3 style="margin: 0.35rem 0 0 0; font-size: 1.35rem; font-weight: 800;">
+          Change Password
+        </h3>
+      </div>
+
+      <p style="color: var(--paper-ink-muted); font-size: 0.85rem; margin-bottom: 1.25rem; line-height: 1.45;">
+        To change your password, provide your current password for security verification, then choose a strong new password.
+      </p>
+
+      <form method="POST" action="{{ url_for('auth.profile') }}">
+        {{ password_form.hidden_tag() }}
+
+        <!-- Current Password -->
+        <div style="margin-bottom: 1.1rem;">
+          <label for="{{ password_form.current_password.id }}" style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem;">
+            Current Password <span style="color: #dc2626;">*</span>
+          </label>
+          {{ password_form.current_password(placeholder="••••••••", style="width: 100%; padding: 0.55rem; border: 1.5px solid var(--paper-ink); font-family: var(--font-mono); font-size: 0.95rem; box-shadow: 2px 2px 0px var(--paper-ink);") }}
+          {% for error in password_form.current_password.errors %}
+            <div style="color: #dc2626; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; margin-top: 0.25rem;">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <!-- New Password -->
+        <div style="margin-bottom: 1.1rem;">
+          <label for="{{ password_form.new_password.id }}" style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem;">
+            New Password <span style="color: #dc2626;">*</span>
+          </label>
+          {{ password_form.new_password(placeholder="Minimum 6 characters", style="width: 100%; padding: 0.55rem; border: 1.5px solid var(--paper-ink); font-family: var(--font-mono); font-size: 0.95rem; box-shadow: 2px 2px 0px var(--paper-ink);") }}
+          {% for error in password_form.new_password.errors %}
+            <div style="color: #dc2626; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; margin-top: 0.25rem;">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <!-- Confirm New Password -->
+        <div style="margin-bottom: 1.5rem;">
+          <label for="{{ password_form.confirm_new_password.id }}" style="display: block; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem;">
+            Confirm New Password <span style="color: #dc2626;">*</span>
+          </label>
+          {{ password_form.confirm_new_password(placeholder="Repeat new password", style="width: 100%; padding: 0.55rem; border: 1.5px solid var(--paper-ink); font-family: var(--font-mono); font-size: 0.95rem; box-shadow: 2px 2px 0px var(--paper-ink);") }}
+          {% for error in password_form.confirm_new_password.errors %}
+            <div style="color: #dc2626; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; margin-top: 0.25rem;">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <!-- Submit Password Button -->
+        {{ password_form.submit_password(class="btn-paper", style="width: 100%; font-size: 0.95rem; font-weight: 800; padding: 0.65rem; background: var(--paper-sheet-warm); border-color: var(--paper-ink);") }}
+      </form>
+    </article>
+
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  
+  <!-- Page Title dynamically populated from route or site_config -->
+  <title>{% block title %}{{ config_data.SITE_NAME }} - {{ config_data.SITE_TAGLINE }}{% endblock %}</title>
+  
+  <!-- Favicon SVG (Replace static/icons/logo.svg to change) -->
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/logo.svg') }}">
+
+  <!-- Google Fonts: Instrument Serif, Inter, Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- 1. Three.js Engine & 3D Model Loaders (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+  <!-- 2. Hackrec Boxy Paper Design System & Styling -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+  <!-- ========================================================================
+       TOP NAVIGATION BAR
+       ======================================================================== -->
+  {% block navbar %}
+    {% include 'partials/navbar.html' %}
+  {% endblock %}
+
+  <!-- ========================================================================
+       OPTIONAL FULL BLEED HERO / TOP BANNER
+       ======================================================================== -->
+  {% block full_width_top %}{% endblock %}
+
+  <!-- ========================================================================
+       MAIN CONTENT CONTAINER
+       ======================================================================== -->
+  {% block main_container %}
+    <main class="{% block main_class %}container{% endblock %}">
+      <!-- Reusable Flash Notification Banners (Success, Error, Info) -->
+      {% include 'partials/flash_messages.html' %}
+
+      <!-- Page Specific Content Block -->
+      {% block content %}{% endblock %}
+    </main>
+  {% endblock %}
+
+  <!-- ========================================================================
+       OPTIONAL FULL BLEED FOOTER / BOTTOM CTA
+       ======================================================================== -->
+  {% block full_width_bottom %}{% endblock %}
+
+  <!-- ========================================================================
+       SITE FOOTER
+       ======================================================================== -->
+  {% block footer %}
+    {% include 'partials/footer.html' %}
+  {% endblock %}
+
+  <!-- Minimal Vanilla JavaScript -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

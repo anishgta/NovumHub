@@ -150,6 +150,81 @@
         </div>
       {% endif %}
     </div>
+
+    <!-- All Hackathon Project Submissions Management Card -->
+    <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; margin-top: 2rem; box-shadow: var(--shadow-sm);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--midnight-navy); margin: 0;">
+            Hackathon Project Submissions ({{ all_projects|default([])|length }})
+          </h3>
+          <p style="color: var(--muted-text); font-size: 0.82rem; margin: 0.2rem 0 0 0;">
+            Review, inspect, or permanently remove hackathon submissions across all events.
+          </p>
+        </div>
+      </div>
+
+      {% if all_projects %}
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 2px solid #E2E8F0; text-align: left; font-size: 0.85rem; color: #64748B;">
+              <th style="padding: 0.6rem;">Project Title</th>
+              <th style="padding: 0.6rem;">Event</th>
+              <th style="padding: 0.6rem;">Team & Track</th>
+              <th style="padding: 0.6rem; text-align: center;">Demo Mode</th>
+              <th style="padding: 0.6rem; text-align: center;">Status</th>
+              <th style="padding: 0.6rem; text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for proj in all_projects %}
+              <tr style="border-bottom: 1px solid #E2E8F0; font-size: 0.88rem;">
+                <td style="padding: 0.85rem 0.6rem;">
+                  <strong><a href="{{ url_for('showcase.detail', project_id=proj.id) }}" style="color: var(--midnight-navy); text-decoration: none;">{{ proj.title }}</a></strong>
+                  {% if proj.is_featured %}
+                    <span style="font-size: 0.68rem; background: #FEF3C7; color: #92400E; font-weight: 700; padding: 0.1rem 0.4rem; border: 1px solid #F59E0B; margin-left: 0.35rem;">Featured</span>
+                  {% endif %}
+                </td>
+                <td style="padding: 0.85rem 0.6rem; font-size: 0.82rem; color: #475569;">
+                  {{ proj.event.name }}
+                </td>
+                <td style="padding: 0.85rem 0.6rem; font-size: 0.82rem;">
+                  <strong>{{ proj.team_name }}</strong> &bull; <span style="color: #64748B;">{{ proj.track }}</span>
+                </td>
+                <td style="padding: 0.85rem 0.6rem; text-align: center; font-size: 0.8rem;">
+                  <span class="category-pill-tag tag-infra" style="font-size: 0.72rem; padding: 0.15rem 0.45rem;">{{ proj.demo_mode_label }}</span>
+                </td>
+                <td style="padding: 0.85rem 0.6rem; text-align: center; font-size: 0.8rem;">
+                  {% if proj.status == 'published' %}
+                    <span style="color: #059669; font-weight: 700;">&#10003; Published</span>
+                  {% elif proj.status == 'draft' %}
+                    <span style="color: #94A3B8;">Draft</span>
+                  {% else %}
+                    <span style="color: #D97706;">{{ proj.status|capitalize }}</span>
+                  {% endif %}
+                </td>
+                <td style="padding: 0.85rem 0.6rem; text-align: right; white-space: nowrap;">
+                  <a href="{{ url_for('showcase.detail', project_id=proj.id) }}" class="btn-editorial-outline" style="padding: 0.25rem 0.6rem; font-size: 0.78rem; text-decoration: none; margin-right: 0.35rem;">
+                    View
+                  </a>
+                  <form method="POST" action="{{ url_for('showcase.admin_project_delete', project_id=proj.id) }}" style="display: inline; margin: 0;" onsubmit="return confirm('Are you sure you want to permanently delete hackathon submission \'{{ proj.title }}\'? This action cannot be undone.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="next" value="{{ url_for('showcase.admin_events') }}">
+                    <button type="submit" class="btn-editorial-outline" style="padding: 0.25rem 0.6rem; font-size: 0.78rem; color: #b91c1c; border-color: #b91c1c; cursor: pointer; background: #ffffff;">
+                      Delete
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div style="text-align: center; padding: 1.5rem; color: var(--muted-text); font-size: 0.9rem;">
+          No hackathon submissions have been entered yet.
+        </div>
+      {% endif %}
+    </div>
   {% endif %}
 </div>
 {% endblock %}

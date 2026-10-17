@@ -356,3 +356,39 @@ def test_browse_unified_search(client, app, sample_event, users):
     assert res.status_code == 200
     assert b"Quantum Cryptography Simulator" in res.data
     assert b"Matching Hackathon Demonstrations" in res.data
+
+
+# ==============================================================================
+# 10. ADMIN HACKATHON SUBMISSION REMOVAL
+# ==============================================================================
+def test_admin_delete_showcase_project(client, app, sample_event, users):
+    """Admin can permanently delete any hackathon submission with cascade cleanup."""
+    with app.app_context():
+        p = ShowcaseProject(
+            title="Project To Be Removed",
+            pitch="Test pitch for deletion",
+            description="Detailed test description",
+            event_id=sample_event, track="General", team_name="RemovableTeam",
+            owner_id=users["student"], demo_mode="screenshot", status="published"
+        )
+        db.session.add(p)
+        db.session.commit()
+        p_id = p.id
+
+    # 1. Non-admin student attempt should be rejected (403)
+    client.post("/login", data={"email": "student@aitpune.edu.in", "password": "Pass123"}, follow_redirects=True)
+    res_student = client.post(f"/showcase/admin/projects/{p_id}/delete")
+    assert res_student.status_code == 403
+
+    # 2. Admin login and delete
+    client.get("/logout", follow_redirects=True)
+    client.post("/login", data={"email": "admin@aitpune.edu.in", "password": "Admin@123"}, follow_redirects=True)
+    res_admin = client.post(f"/showcase/admin/projects/{p_id}/delete", follow_redirects=True)
+    assert res_admin.status_code == 200
+    assert b"successfully removed" in res_admin.data
+
+    # 3. Verify project is gone from database
+    with app.app_context():
+        deleted = db.session.get(ShowcaseProject, p_id)
+        assert deleted is None
+

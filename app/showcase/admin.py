@@ -7,9 +7,14 @@ library curator controls.
 ================================================================================
 """
 
-from flask import render_template, redirect, url_for, flash, request, abort
+import os
+import shutil
+from flask import render_template, redirect, url_for, flash, request, abort, current_app
 from flask_login import current_user, login_required
-from app.models import db, ShowcaseProject, HackathonEvent
+from app.models import (
+    db, ShowcaseProject, HackathonEvent, ProjectMember,
+    ProjectAsset, DevNote, JudgeScore, Upvote, Comment, StatusChange
+)
 from app.showcase import showcase_bp
 from app.showcase.forms import HackathonEventForm
 
@@ -24,10 +29,11 @@ def require_admin():
 @showcase_bp.route("/admin/events")
 @login_required
 def admin_events():
-    """List all hackathon events for administrative management."""
+    """List all hackathon events and project submissions for administrative management."""
     require_admin()
     events = HackathonEvent.query.order_by(HackathonEvent.year.desc(), HackathonEvent.id.desc()).all()
-    return render_template("showcase/admin_events.html", events=events)
+    all_projects = ShowcaseProject.query.order_by(ShowcaseProject.created_at.desc()).all()
+    return render_template("showcase/admin_events.html", events=events, all_projects=all_projects)
 
 
 @showcase_bp.route("/admin/events/new", methods=["GET", "POST"])
@@ -127,3 +133,63 @@ def change_status(project_id: int):
         db.session.commit()
         flash(f"Status changed to {new_status}.", "success")
     return redirect(url_for("showcase.detail", project_id=project.id))
+
+
+@showcase_bp.route("/<int:project_id>/delete", methods=["POST"])
+@showcase_bp.route("/admin/projects/<int:project_id>/delete", methods=["POST"])
+@login_required
+def admin_project_delete(project_id: int):
+    """Permanently delete a hackathon project submission (Admin only)."""
+    require_admin()
+    project = db.get_or_404(ShowcaseProject, project_id)
+    project_title = project.title
+    event_id = project.event_id
+
+    # 1. Safely remove physical files on disk
+    upload_folder = current_app.config.get("UPLOAD_FOLDER")
+    if upload_folder:
+        for asset in project.assets:
+            if asset.file_path:
+                full_path = os.path.join(upload_folder, asset.file_path)
+                if os.path.isfile(full_path):
+                    try:
+                        os.remove(full_path)
+                    except OSError:
+                        pass
+
+        # Remove extracted demos directory for this project if present
+        demos_dir = os.path.join(upload_folder, "demos", str(project.id))
+        if os.path.isdir(demos_dir):
+            try:
+                shutil.rmtree(demos_dir, ignore_errors=True)
+            except OSError:
+                pass
+
+    # 2. Explicitly remove related foreign-key entries to prevent SQLite constraint failures
+    try:
+        ProjectMember.query.filter_by(project_id=project.id).delete()
+        ProjectAsset.query.filter_by(project_id=project.id).delete()
+        DevNote.query.filter_by(project_id=project.id).delete()
+        JudgeScore.query.filter_by(project_id=project.id).delete()
+        Upvote.query.filter_by(showcase_project_id=project.id).delete()
+        Comment.query.filter_by(showcase_project_id=project.id).delete()
+        StatusChange.query.filter_by(showcase_project_id=project.id).delete()
+        db.session.delete(project)
+        db.session.commit()
+        flash(f"Hackathon submission '{project_title}' has been successfully removed.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error removing hackathon submission: {str(e)}", "danger")
+        return redirect(url_for("showcase.detail", project_id=project_id))
+
+    # 3. Determine safe redirect target
+    next_url = request.form.get("next") or request.referrer
+    if next_url and ("showcase" in next_url or "admin" in next_url):
+        # Don't redirect back to the detail page of the deleted project
+        if f"/showcase/{project_id}" not in next_url:
+            return redirect(next_url)
+
+    if event_id:
+        return redirect(url_for("showcase.event_detail", event_id=event_id))
+    return redirect(url_for("showcase.admin_events"))
+

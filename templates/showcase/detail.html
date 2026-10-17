@@ -48,6 +48,14 @@
           {% if project.is_reference %}Remove Reference{% else %}+ Reference Library{% endif %}
         </button>
       </form>
+
+      <!-- Admin Delete / Remove Submission -->
+      <form method="POST" action="{{ url_for('showcase.admin_project_delete', project_id=project.id) }}" style="display: inline; margin: 0;" onsubmit="return confirm('Are you sure you want to permanently delete this hackathon submission ({{ project.title }})? This action cannot be undone.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn-editorial-outline" style="padding: 0.35rem 0.85rem; font-size: 0.82rem; margin: 0; color: #b91c1c; border-color: #b91c1c; background: #ffffff;">
+          &#128465; Delete Submission
+        </button>
+      </form>
     {% endif %}
   </div>
 </div>

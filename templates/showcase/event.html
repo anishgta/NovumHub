@@ -163,9 +163,20 @@
             <a href="{{ url_for('showcase.detail', project_id=p.id) }}">{{ p.title }}</a>
           </h4>
           <p class="project-pitch">{{ p.pitch }}</p>
-          <div class="project-card-footer">
+          <div class="project-card-footer" style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
             <span>By <strong>{{ p.team_name }}</strong></span>
-            <span style="font-family: var(--font-mono); font-weight: 700; color: var(--midnight-navy);">&#9650; {{ p.upvote_count }}</span>
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <span style="font-family: var(--font-mono); font-weight: 700; color: var(--midnight-navy);">&#9650; {{ p.upvote_count }}</span>
+              {% if current_user.is_authenticated and current_user.is_admin %}
+                <form method="POST" action="{{ url_for('showcase.admin_project_delete', project_id=p.id) }}" style="display: inline; margin: 0;" onsubmit="return confirm('Permanently remove hackathon submission \'{{ p.title }}\'?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="next" value="{{ request.full_path }}">
+                  <button type="submit" style="background: none; border: 1px solid #b91c1c; color: #b91c1c; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.45rem; cursor: pointer;" title="Delete this hackathon submission">
+                    Delete
+                  </button>
+                </form>
+              {% endif %}
+            </div>
           </div>
         </div>
       </div>
